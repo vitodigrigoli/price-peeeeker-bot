@@ -5,6 +5,8 @@ LISTA COMANDI
 
 start - Welcome message
 view_tracked - View all currently tracked products
+set_lang - Select the bot language
+set_username - Choose the name the bot will use to call you
 help - How to use the bot correctly
 coffee - Thank the developer for saving you money on Amazon
 
@@ -21,32 +23,13 @@ import regex
 import firebase_admin
 from firebase_admin import credentials, firestore
 import time, random
+from translations import it_strings, en_strings
+from functools import wraps
+
 
 # Constant
 TOKEN = "6420747835:AAE-6-JFsSoccOCXpA_opgmLsGS3dQWEzd4"
 AMAZON_AFFILIATE_TAG = "advicenology_vito-21"
-
-# Dictionary
-it_strings = {
-    "greeting": "Ciao!",
-    "instruction": "Per favore, scegli un'opzione.",
-    "commands": {
-        "start": "Inizia ad usare il bot",
-        "help": "Ottieni informazioni su come usare il bot",
-        # ... (aggiungi altre descrizioni di comandi qui)
-    }
-}
-
-en_strings = {
-    "greeting": "Hello!",
-    "instruction": "Please choose an option.",
-    "commands": {
-        "start": "Start using the bot",
-        "help": "Get information on how to use the bot",
-        # ... (add other command descriptions here)
-    }
-}
-
 
 
 # Initialization Firebase
@@ -54,6 +37,8 @@ cred = credentials.Certificate("price-peeker-bot-firebase-adminsdk-i71n8-df7db42
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+
+# Definition of the Product class
 class Product:
     def __init__(self, name="Default Name", url="https://default.url", price=0, asin='XXXXXXXXXX', id='XXXXXXXXXX'):
         self.name = name
@@ -66,37 +51,54 @@ class Product:
         return f"Product(nome='{self.name}', url='{self.url}', prezzo={self.price}, ASIN={self.asin}, ID={self.id})"
 
 
-def choose_language(update, context):
-    keyboard = [
-        [InlineKeyboardButton("Italiano", callback_data='lang:it')],
-        [InlineKeyboardButton("English", callback_data='lang:en')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Please choose your language:', reply_markup=reply_markup)
+# Decorator that checks the user's language and sets the correct strings in the bot's context
+def language_handler(func):
+    @wraps(func)
+    def wrapper(update, context, *args, **kwargs):
+        user_language = context.user_data.get('language', 'en')  # Use 'en' as the default language
 
-
-
-def greet_user(update, context):
-    user_language = context.user_data.get('language', 'en')  # Utilizza 'en' come lingua predefinita
+        if user_language == 'it':
+            context.user_data['strings'] = it_strings
+        else:
+            context.user_data['strings'] = en_strings
+        
+        return func(update, context, *args, **kwargs)
     
-    if user_language == 'it':
-        strings = it_strings
-    else:
-        strings = en_strings
-
-    update.message.reply_text(strings['greeting'])
-    update.message.reply_text(strings['instruction'])
-
+    return wrapper
 
 
 # Function to generate a welcome message at start
-def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text('Ciao testa di cazzo! Sono il tuo bot. Ora posso salvare i link nel database')
-    choose_language(update, context)
+@language_handler
+def start(update, context):
+    strings = context.user_data['strings']
+    username = context.user_data.get('username', '')  # Use empty string as the default username
+    update.message.reply_text(strings['welcome'].format(username=username))
+
+
+
 
 # Function to generate a shutdown message when stopping
 def stop(update, context):
     update.message.reply_text('Il bot si sta spegnendo...')
+
+@language_handler
+# Function that allows you to choose the language
+def choose_language(update, context):
+    keyboard = [
+        [InlineKeyboardButton("Italiano 🇮🇹", callback_data='lang:it')],
+        [InlineKeyboardButton("English 🇬🇧", callback_data='lang:en')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    strings = context.user_data['strings']
+    update.message.reply_text(strings['choose_language'], reply_markup=reply_markup)
+
+@language_handler
+# Function that generates a help message
+def show_help(update, context):
+    strings = context.user_data['strings']
+    help_text = "\n".join([f"/{command} - {description}" for command, description in strings["commands"].items()])
+    update.message.reply_text(help_text)
 
 
 # Function to generate an Amazon affiliate link
@@ -109,6 +111,8 @@ def generate_affiliate_link(url):
     else:
         return url
 
+
+# Function that generates a link to add a product directly to the cart
 def generate_add_to_cart_link(asin):
     url = f'https://www.amazon.it/gp/aws/cart/add.html?ASIN.1={asin}&Quantity.1=1&AssociateTag={AMAZON_AFFILIATE_TAG}'
 
@@ -173,6 +177,7 @@ def track (update, context):
             update.message.reply_text(f'No valid link found in message.')
 
 
+# Function that adds a product to be tracked to the database
 def add_to_database(user_id, product):
     doc_ref = db.collection('user_data').document()
 
@@ -184,6 +189,8 @@ def add_to_database(user_id, product):
         'product_asin':  product.asin,
     })
 
+
+# Function that removes a tracked product from the database
 def remove_from_database(document_id):
     try:
         db.collection('user_data').document(document_id).delete()
@@ -191,8 +198,6 @@ def remove_from_database(document_id):
 
     except Exception as e:
         print(f'Errore nell\'eliminare il documento: {e}')
-
-
 
 
 # Function that checks whether the price has dropped
@@ -223,7 +228,7 @@ def check_price(context):
         time.sleep(random.uniform(1, 5))
 
 
-
+# Function that prints all the user's tracked products
 def view_tracked_products(update, context):
     user_id = update.message.from_user.id
     tracked_products = get_user_products(user_id)
@@ -239,10 +244,8 @@ def view_tracked_products(update, context):
         response_message = "Non stai tracciando alcun prodotto al momento."
         update.message.reply_text(response_message)
 
-    
 
-
-
+# Function that prints a list of products
 def print_products(products, update):
 
     for product in products:
@@ -260,13 +263,16 @@ def print_products(products, update):
         update.message.reply_text(f'{product.name}\n', reply_markup=reply_markup)
 
 
+# Function that manages button callbacks
+@language_handler
 def button(update, context):
     query = update.callback_query
     query.answer()
-    
+
     # Analizzare i dati della callback
     action, value = query.data.split(':')
     
+
     if action == 'remove':
         # Codice per eliminare l'elemento con ID item_id
         remove_from_database(value)
@@ -280,10 +286,14 @@ def button(update, context):
         # Salva la preferenza linguistica dell'utente nel database o in una struttura dati temporanea
         if value ==  'it':
             context.user_data['language'] = 'it'
+            text = "La lingua è stata impostata correttamente ✅"
         else:
             context.user_data['language'] = 'en'
+            text = "The language has been selected correctly ✅"
 
-        query.edit_message_text(text="Language selected!")
+        query.edit_message_text(text=text)
+
+
 
 
 
@@ -306,6 +316,7 @@ def get_user_products(user_id):
     return products_list
 
 
+
 def main():
     
     # Initialization Bot
@@ -316,10 +327,12 @@ def main():
     # Add handlers
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler('stop', stop))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, callback=track))
-    dp.add_handler(CommandHandler('view_tracked', view_tracked_products))
-    dp.add_handler(CallbackQueryHandler(button))
     dp.add_handler(CommandHandler('lang', choose_language))
+    dp.add_handler(CommandHandler('help', show_help))
+    dp.add_handler(CommandHandler('view_tracked', view_tracked_products))
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, callback=track))
+    dp.add_handler(CallbackQueryHandler(button))
+
 
     # Add a job to check the price every 1 minute
     #job_queue.run_repeating(check_price, interval=60, first=0)
