@@ -5,7 +5,7 @@ LISTA COMANDI
 
 start - Welcome message
 view_tracked - View all currently tracked products
-set_lang - Select the bot language
+set_language - Select the bot language
 set_username - Choose the name the bot will use to call you
 help - How to use the bot correctly
 coffee - Thank the developer for saving you money on Amazon
@@ -16,7 +16,7 @@ coffee - Thank the developer for saving you money on Amazon
 
 # Libraries
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, CallbackContext, Updater, Filters, MessageHandler, CallbackQueryHandler
+from telegram.ext import CommandHandler, CallbackContext, Updater, Filters, MessageHandler, CallbackQueryHandler, ConversationHandler
 import requests
 from bs4 import BeautifulSoup
 import regex
@@ -71,9 +71,8 @@ def language_handler(func):
 @language_handler
 def start(update, context):
     strings = context.user_data['strings']
-    username = context.user_data.get('username', '')  # Use empty string as the default username
-    update.message.reply_text(strings['welcome'].format(username=username))
-
+    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
+    update.message.reply_text(strings['welcome'].format(custom_name=custom_name))
 
 
 
@@ -81,9 +80,11 @@ def start(update, context):
 def stop(update, context):
     update.message.reply_text('Il bot si sta spegnendo...')
 
+
+
 @language_handler
 # Function that allows you to choose the language
-def choose_language(update, context):
+def set_language(update, context):
     keyboard = [
         [InlineKeyboardButton("Italiano 🇮🇹", callback_data='lang:it')],
         [InlineKeyboardButton("English 🇬🇧", callback_data='lang:en')]
@@ -274,16 +275,12 @@ def button(update, context):
     
 
     if action == 'remove':
-        # Codice per eliminare l'elemento con ID item_id
+        # Delete the item with ID item_id
         remove_from_database(value)
         query.edit_message_text(text=f"Elemento con ID {value} eliminato")
-
-    elif action == 'view':
-        # Codice per visualizzare l'elemento con ID item_id
-        query.edit_message_text(text=f"Visualizzazione dell'elemento con ID {value}")
     
     elif action == 'lang':
-        # Salva la preferenza linguistica dell'utente nel database o in una struttura dati temporanea
+        #  Saves the user's language preference in the context
         if value ==  'it':
             context.user_data['language'] = 'it'
             text = "La lingua è stata impostata correttamente ✅"
@@ -292,10 +289,8 @@ def button(update, context):
             text = "The language has been selected correctly ✅"
 
         query.edit_message_text(text=text)
-
-
-
-
+    else:
+        print("button default behavior")
 
 
 # Retrieves the user's products from the database
@@ -316,6 +311,26 @@ def get_user_products(user_id):
     return products_list
 
 
+@language_handler
+def set_username(update, context):
+    strings = context.user_data['strings']
+    update.message.reply_text(strings['choose_username'])
+    context.user_data['set_username'] = True
+
+
+@language_handler
+def name_callback(update, context):
+
+    if context.user_data.get('set_username'):
+        custom_name = f" {update.message.text}"
+        context.user_data['custom_name'] = custom_name
+
+        strings = context.user_data['strings']
+        update.message.reply_text(strings['selected_username'].format(custom_name=custom_name))
+        context.user_data['set_username'] = False
+    else:
+        update.message.reply_text(f'Manda un link disgraziato')
+
 
 def main():
     
@@ -324,14 +339,19 @@ def main():
     dp = updater.dispatcher
     job_queue = updater.job_queue
 
+
     # Add handlers
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler('stop', stop))
-    dp.add_handler(CommandHandler('lang', choose_language))
+    dp.add_handler(CommandHandler('set_language', set_language))
+
     dp.add_handler(CommandHandler('help', show_help))
     dp.add_handler(CommandHandler('view_tracked', view_tracked_products))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, callback=track))
+    dp.add_handler(MessageHandler(Filters.text & Filters.entity("url"), track), group=0)
+    dp.add_handler(CommandHandler('set_username', set_username), group=1)
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.entity("url"), name_callback))
     dp.add_handler(CallbackQueryHandler(button))
+
 
 
     # Add a job to check the price every 1 minute
