@@ -76,7 +76,6 @@ def start(update, context):
     update.message.reply_text(strings['welcome'].format(custom_name=custom_name))
 
 
-
 # Function to generate a shutdown message when stopping
 def stop(update, context):
     update.message.reply_text('Il bot si sta spegnendo...')
@@ -94,6 +93,7 @@ def set_language(update, context):
     strings = context.user_data['strings']
     update.message.reply_text(strings['choose_language'], reply_markup=reply_markup)
 
+
 @language_handler
 # Function that generates a help message
 def help(update, context):
@@ -105,7 +105,10 @@ def help(update, context):
 
 
 # Function to generate an Amazon affiliate link
-def generate_affiliate_link(url):
+def generate_affiliate_link(asin):
+
+    url = "https://www.amazon.it/dp/" +  asin
+
     if AMAZON_AFFILIATE_TAG:
         if '?' in url:
             return f"{url}&tag={AMAZON_AFFILIATE_TAG}"
@@ -152,6 +155,8 @@ def get_amazon_product(url):
     price = float(price.text.replace('€', '').replace(',', '.').strip())
     name = str(name.text).strip()
 
+    url = generate_affiliate_link(asin)
+
     product = Product(name, url, price, asin)
 
     return product
@@ -160,20 +165,20 @@ def get_amazon_product(url):
 # Function to send an Amazon affiliate link
 def track (update, context):
     message = update.message.text
-    link = find_link_in_message(message)
+    url = find_link_in_message(message)
     user_id = update.message.from_user.id
 
     strings = context.user_data['strings']
     custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
 
-    if link:
-        affiliate_link = generate_affiliate_link(link)
-        product = get_amazon_product(affiliate_link)
+    if url:
+        product = get_amazon_product(url)
+        
         print(product)
 
         if product :
             add_to_database(user_id, product)
-            print_products([product], update)
+            print_products(update, context, [product])
             update.message.reply_text(strings['tracking'].format(custom_name=custom_name))
             
         else:
@@ -235,9 +240,13 @@ def check_price(context):
 
 
 # Function that prints all the user's tracked products
+@language_handler
 def view_tracked_products(update, context):
     user_id = update.message.from_user.id
     tracked_products = get_user_products(user_id)
+
+    strings = context.user_data['strings']
+    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
 
     for product in tracked_products:
         print(product)
@@ -245,28 +254,30 @@ def view_tracked_products(update, context):
     
     # Se la lista è vuota, invia un messaggio che indica che non ci sono elementi tracciati
     if tracked_products:
-        print_products(tracked_products, update)
+        print_products( update, context, tracked_products)
     else:
-        response_message = "Non stai tracciando alcun prodotto al momento."
-        update.message.reply_text(response_message)
+        update.message.reply_text(strings['list_empty'].format(custom_name=custom_name))
 
 
 # Function that prints a list of products
-def print_products(products, update):
+@language_handler
+def print_products(update, context, products):
+
+    strings = context.user_data['strings']
 
     for product in products:
         keyboard = [
             [
-                InlineKeyboardButton("Remove", callback_data=f'remove:{product.id}'),
-                InlineKeyboardButton("View on Amazon", url=product.url),
+                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.id}'),
+                InlineKeyboardButton(strings['view_button'], url=product.url),
             ],
             [
-                InlineKeyboardButton("Add to Cart NOW", url=generate_add_to_cart_link(product.asin)),
+                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.asin)),
             ],
         ]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text(f'{product.name}\n', reply_markup=reply_markup)
+        update.message.reply_text(f'{product.name}\n\n€{product.price} 💰\n\n{product.url}', reply_markup=reply_markup)
 
 
 # Function that manages button callbacks
