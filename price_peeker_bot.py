@@ -9,6 +9,7 @@ set_language - Select the bot language
 set_username - Choose the name the bot will use to call you
 help - How to use the bot correctly
 coffee - Thank the developer for saving you money on Amazon
+report - Report a bug to the developer
 
 
 """
@@ -55,7 +56,7 @@ class Product:
 def language_handler(func):
     @wraps(func)
     def wrapper(update, context, *args, **kwargs):
-        user_language = context.user_data.get('language', 'en')  # Use 'en' as the default language
+        user_language = context.user_data.get('language', 'it')  # Use 'en' as the default language
 
         if user_language == 'it':
             context.user_data['strings'] = it_strings
@@ -81,7 +82,6 @@ def stop(update, context):
     update.message.reply_text('Il bot si sta spegnendo...')
 
 
-
 @language_handler
 # Function that allows you to choose the language
 def set_language(update, context):
@@ -96,10 +96,12 @@ def set_language(update, context):
 
 @language_handler
 # Function that generates a help message
-def show_help(update, context):
+def help(update, context):
     strings = context.user_data['strings']
-    help_text = "\n".join([f"/{command} - {description}" for command, description in strings["commands"].items()])
-    update.message.reply_text(help_text)
+    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
+
+    commands = "\n".join([f"/{command} - {description}\n" for command, description in strings["commands"].items()])
+    update.message.reply_text(strings["help"].format(custom_name=custom_name) + commands)
 
 
 # Function to generate an Amazon affiliate link
@@ -154,12 +156,15 @@ def get_amazon_product(url):
 
     return product
 
-
+@language_handler
 # Function to send an Amazon affiliate link
 def track (update, context):
     message = update.message.text
     link = find_link_in_message(message)
     user_id = update.message.from_user.id
+
+    strings = context.user_data['strings']
+    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
 
     if link:
         affiliate_link = generate_affiliate_link(link)
@@ -168,8 +173,8 @@ def track (update, context):
 
         if product :
             add_to_database(user_id, product)
-            update.message.reply_text("I am tracking your product correctly!")
             print_products([product], update)
+            update.message.reply_text(strings['tracking'].format(custom_name=custom_name))
             
         else:
             update.message.reply_text("I could not find the price for this product.")
@@ -320,16 +325,17 @@ def set_username(update, context):
 
 @language_handler
 def name_callback(update, context):
+    strings = context.user_data['strings']
+    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
 
     if context.user_data.get('set_username'):
         custom_name = f" {update.message.text}"
         context.user_data['custom_name'] = custom_name
-
-        strings = context.user_data['strings']
+        
         update.message.reply_text(strings['selected_username'].format(custom_name=custom_name))
         context.user_data['set_username'] = False
     else:
-        update.message.reply_text(f'Manda un link disgraziato')
+        update.message.reply_text(strings['default_message'].format(custom_name=custom_name))
 
 
 def main():
@@ -345,7 +351,7 @@ def main():
     dp.add_handler(CommandHandler('stop', stop))
     dp.add_handler(CommandHandler('set_language', set_language))
 
-    dp.add_handler(CommandHandler('help', show_help))
+    dp.add_handler(CommandHandler('help', help))
     dp.add_handler(CommandHandler('view_tracked', view_tracked_products))
     dp.add_handler(MessageHandler(Filters.text & Filters.entity("url"), track), group=0)
     dp.add_handler(CommandHandler('set_username', set_username), group=1)
