@@ -11,6 +11,14 @@ help - How to use the bot correctly
 coffee - Thank the developer for saving you money on Amazon
 report - Report a bug to the developer
 
+start - Inizia a usare il bot
+view_tracked - Visualizza tutti i prodotti attualmente tracciati
+help - Come usare il bot correttamente
+set_language - Seleziona la lingua del bot
+set_username - Scegli il nome che userà il bot per chiamarti
+report - Segnala un bug allo sviluppatore
+coffee - Ringrazia lo sviluppatore per averti farti risparmiare soldi su Amazon
+
 
 """
 
@@ -20,38 +28,42 @@ from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackContext, Updater, Filters, MessageHandler, CallbackQueryHandler, ConversationHandler
 import requests
 from bs4 import BeautifulSoup
-import regex
+import re
 import firebase_admin
 from firebase_admin import credentials, firestore
 import time, random
 from translations import it_strings, en_strings
 from functools import wraps
 from collections import defaultdict
+from bot_constant import DEV_ID, AMAZON_ACCESS_KEY, AMAZON_AFFILIATE_TAG, AMAZON_ASSOC_TAG, AMAZON_SECRET_KEY, AMAZON_COUNTRY, TOKEN
+from amazon_paapi import AmazonApi
 
 
 # Constant
-TOKEN = "6420747835:AAE-6-JFsSoccOCXpA_opgmLsGS3dQWEzd4"
-AMAZON_AFFILIATE_TAG = "advicenology_vito-21"
-DEV_ID = 37104959
-
+NOT_AVAILABLE = 99999
 
 # Initialization Firebase
 cred = credentials.Certificate("price-peeker-bot-firebase-adminsdk-i71n8-df7db42e8b.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+# Crea un'istanza di Amazon
+amazon = AmazonApi(AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOC_TAG, AMAZON_COUNTRY, throttling=10)
+
 
 # Definition of the Product class
 class Product:
-    def __init__(self, name="Default Name", url="https://default.url", price=0, asin='XXXXXXXXXX', id='XXXXXXXXXX'):
+    def __init__(self, name="Default Name", asin='XXXXXXXXXX', price=0, url="https://default.url", user_ID='XXXXXXXXXX', doc_ID='XXXXXXXXXX'):
         self.name = name
+        self.asin = asin
         self.url = url
         self.price = price
-        self.asin = asin
-        self.id = id
+        self.user_ID = user_ID
+        self.doc_ID = doc_ID
+
 
     def __repr__(self):
-        return f"Product(nome='{self.name}', url='{self.url}', prezzo={self.price}, ASIN={self.asin}, ID={self.id})"
+        return f"Product(name='{self.name}', asin={self.asin}, prezzo={self.price}, url='{self.url}', user_ID={self.user_ID}, doc_ID={self.doc_ID})"
 
 
 # Decorator that checks the user's language and sets the correct strings in the bot's context
@@ -75,14 +87,26 @@ def language_handler(func):
 def start(update, context):
     strings = context.user_data['strings']
     custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
-    update.message.reply_text(strings['welcome'].format(custom_name=custom_name))
+    update.message.reply_text(strings['welcome'].format(custom_name=custom_name), parse_mode='HTML')
 
 
-# Function to generate a shutdown message when stopping
-def stop(update, context):
-    update.message.reply_text('Il bot si sta spegnendo...')
+# Function to generate a report message
+@language_handler
+def report(update, context):
+    strings = context.user_data['strings']
+    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
 
-# Function to generate a coffee message
+    keyboard = [
+            [
+                InlineKeyboardButton(strings['report_button'], url="https://t.me/ReportPricePeekerBot"),
+            ],
+        ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text(strings['report'].format(custom_name=custom_name), reply_markup=reply_markup)
+
+
+# Function to generate a coffe message
 @language_handler
 def coffee(update, context):
     strings = context.user_data['strings']
@@ -117,8 +141,8 @@ def help(update, context):
     strings = context.user_data['strings']
     custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
 
-    commands = "\n".join([f"/{command} - {description}\n" for command, description in strings["commands"].items()])
-    update.message.reply_text(strings["help"].format(custom_name=custom_name) + commands)
+    commands = "\n".join([f"🔹 /{command} - <em>{description}</em>\n" for command, description in strings["commands"].items()])
+    update.message.reply_text(strings["help"].format(custom_name=custom_name) + commands, parse_mode='HTML')
 
 
 # Function to generate an Amazon affiliate link
@@ -142,94 +166,93 @@ def generate_add_to_cart_link(asin):
     return url
 
 
+def get_full_url_from_shortlink(shortlink):
+    response = requests.get(shortlink, allow_redirects=True)
+    return response.url
+
+
 # Function to extract a link within a message
-def find_link_in_message(message):
-    url_pattern = r'^(https?:\/\/)?(www\.)?(amazon|amzn)\.[a-z]{2,3}\/.+'
-    match = regex.search(url_pattern, message)
-    
-    if match:
-        # Returns the first URL found in the message
-        return match.group(0)
-    else:
-        # Returns None if no URL is found
+def extract_amazon_link(text):
+    # Cerca link Amazon standard e shortlinks
+    regex = r'(https?://(?:www\.amazon\.[a-zA-Z]{2,3}/.+|amzn\.[a-zA-Z]{2,3}/.+))'
+
+    link = re.findall(regex, text)[0]
+
+    # Se non ci sono link, ritorna None
+    if not link:
         return None
+
+    # Controlla se il link è uno shortlink
+    if 'amzn' in link:
+        return get_full_url_from_shortlink(link)
+    
+    return link
 
 
 # Function to extract price from Amazon link
 def get_amazon_product(url):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.content, 'html.parser')
     
-    # CSS selector
+    item = amazon.get_items(url)[0]
+
+    name = item.item_info.title.display_value
+    asin = item.asin
+    affiliate_url = item.detail_page_url
+
     try:
-        price = soup.select_one('span.a-offscreen')
-        name = soup.select_one('#productTitle')
-        asin = soup.find('input', id='ASIN').get('value')
+        price = item.offers.listings[0].price.amount
+    except:
+        price = NOT_AVAILABLE
 
-        # Clean values
-        price = float(price.text.replace('€', '').replace(',', '.').strip())
-        name = str(name.text).strip()
+    return name, asin, price, affiliate_url
 
-        url = generate_affiliate_link(asin)
-
-        print([price, name, asin, url])
-
-        product = Product(name, url, price, asin)
-
-        return product
-    
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
 
 @language_handler
 # Function to send an Amazon affiliate link
 def track (update, context):
-    message = update.message.text
-    url = find_link_in_message(message)
-    user_id = update.message.from_user.id
 
+    user_ID = update.message.from_user.id
     strings = context.user_data['strings']
     custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
 
+    # Find URL in message
+    message = update.message.text
+    url = extract_amazon_link(message)
+
     if url:
-        product = get_amazon_product(url)
-        
-        print(product)
+        print(url)
+        name, asin, price, affiliate_url = get_amazon_product(url)
+        product = Product(name, asin, price, affiliate_url, user_ID)
 
-        if product :
-            add_to_database(user_id, product)
-            print_products(update, context, [product])
-            update.message.reply_text(strings['tracking'].format(custom_name=custom_name))
-            
-        else:
-            update.message.reply_text("I could not find the price for this product.")
+        add_to_database(product)
 
+        print_products(update, context, [product])
+        update.message.reply_text(strings['tracking'].format(custom_name=custom_name))
+       
     else:
-            update.message.reply_text(f'No valid link found in message.')
+        print("URL valid not found in message.")
 
 
 # Function that adds a product to be tracked to the database
-def add_to_database(user_id, product):
+def add_to_database(product: Product):
     doc_ref = db.collection('user_data').document()
 
+    print(doc_ref.id)
+
     doc_ref.set({
-        'user_id': user_id,
         'product_name': product.name,
-        'product_url': product.url,
-        'product_price': product.price,
         'product_asin':  product.asin,
+        'product_price': product.price,
+        'product_url': product.url,
+        'user_ID': product.user_ID,
+        'doc_ID': doc_ref.id
     })
 
 
 # Function that removes a tracked product from the database
-def remove_from_database(document_id):
+def remove_from_database(doc_ID):
     try:
-        db.collection('user_data').document(document_id).delete()
-        print(f'Documento con ID {document_id} eliminato con successo.')
+        db.collection('user_data').document(doc_ID).delete()
+        print(f'Documento con ID {doc_ID} eliminato con successo.')
 
     except Exception as e:
         print(f'Errore nell\'eliminare il documento: {e}')
@@ -242,46 +265,45 @@ def check_price(context):
     start_time = time.time()
     # Retrieve all documents from 'user_data' collection
     docs = db.collection('user_data').stream()
+    count = 0
 
     for doc in docs:
+        count += 1
         data = doc.to_dict()
-        user_id = data['user_id']
+        user_ID = data['user_ID']
         product_url = data['product_url']
         initial_price = data['product_price']
+        doc_ID = data['doc_ID']
         
-        product = get_amazon_product(product_url)
+        name, asin, price, affiliate_url = get_amazon_product(product_url)
+        product = Product(name, asin, price, affiliate_url, user_ID, doc_ID)
         print(product)
-        
-        if product:
-            if product.price and product.price < initial_price:
 
-                # updates the initial price in the database
-                doc.reference.update({'product_price': product.price})
-            
-            else:
-                text = it_strings['price_dropped'].format(product_name=product.name, product_price=product.price, initial_price=initial_price, product_url = product.url)
-                
+        if product.price != initial_price:
+            # updates the price and in the database
+            doc.reference.update({'product_price': product.price})
+
+            if  product.price < initial_price:
                 keyboard = [
                     [
-                        InlineKeyboardButton(it_strings['remove_button'], callback_data=f'remove:{product.id}'),
+                        InlineKeyboardButton(it_strings['remove_button'], callback_data=f'remove:{product.doc_ID}'),
                         InlineKeyboardButton(it_strings['view_button'], url=product.url),
                     ],
                     [
                         InlineKeyboardButton(it_strings['cart_button'], url=generate_add_to_cart_link(product.asin)),
                     ],
                 ]
-
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            context.bot.send_message(chat_id=user_id, text=text, reply_markup=reply_markup)
-            
-            time.sleep(random.uniform(1, 5))
+                text = it_strings['price_dropped'].format(product_name=product.name, product_price=product.price, initial_price=initial_price, product_url = product.url)
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                context.bot.send_message(chat_id=user_ID, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     end_time = time.time()
     elapsed_time = end_time - start_time
     [hours, minutes, seconds] = time_converter(elapsed_time)
+    [avg_hours, avg_minutes, avg_seconds] = time_converter(elapsed_time/count)
 
-    dev_text = f"⏱ Job Elapsed Time: {int(hours)} hours - {int(minutes)} minutes - {int(seconds)} seconds"
-    context.bot.send_message(chat_id=DEV_ID, text=dev_text)
+    dev_text = f"--------------------------------------------------------------\n<strong>CHECK PRICE JOB STATISTICS</strong> 📊 \n--------------------------------------------------------------\n\n⏱ <strong>Elapsed Time</strong>: {int(hours)} hours - {int(minutes)} minutes - {int(seconds)} seconds\n\n📦 <strong>Tracked Products</strong>: {count}\n\n🧮 <strong>Time/Products</strong>: {int(avg_hours)} hours - {int(avg_minutes)} minutes - {int(avg_seconds)} seconds"
+    context.bot.send_message(chat_id=DEV_ID, text=dev_text, parse_mode='HTML')
 
 
 # Function that converts time into hours, minutes and seconds
@@ -295,8 +317,8 @@ def time_converter(elapsed_time):
 # Function that prints all the user's tracked products
 @language_handler
 def view_tracked_products(update, context):
-    user_id = update.message.from_user.id
-    tracked_products = get_user_products(user_id)
+    user_ID = update.message.from_user.id
+    tracked_products = get_user_products(user_ID)
 
     strings = context.user_data['strings']
     custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
@@ -321,7 +343,7 @@ def print_products(update, context, products):
     for product in products:
         keyboard = [
             [
-                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.id}'),
+                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.doc_ID}'),
                 InlineKeyboardButton(strings['view_button'], url=product.url),
             ],
             [
@@ -330,7 +352,11 @@ def print_products(update, context, products):
         ]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text(f'🛍️ {product.name}\n\n💲{product.price} €\n\n🔗 {product.url}', reply_markup=reply_markup)
+
+        if product.price != NOT_AVAILABLE:
+            update.message.reply_text(f'<strong>🛍️ {product.name}\n\n💰 {product.price} €</strong>\n\n🟢 {strings["available"]}\n\n🔗 {product.url}', reply_markup=reply_markup, parse_mode='HTML')
+        else:
+            update.message.reply_text(f'<strong>🛍️ {product.name}</strong>\n\n🔴 {strings["not_available"]}\n\n🔗 {product.url}', reply_markup=reply_markup, parse_mode='HTML')
 
 
 # Function that manages button callbacks
@@ -353,10 +379,10 @@ def button(update, context):
         #  Saves the user's language preference in the context
         if value ==  'it':
             context.user_data['language'] = 'it'
-            text = "La lingua è stata impostata correttamente ✅"
+            text = "✅ La lingua è stata impostata correttamente"
         else:
             context.user_data['language'] = 'en'
-            text = "The language has been selected correctly ✅"
+            text = "✅ The language has been selected correctly"
         
     else:
         print("button default behavior")
@@ -365,10 +391,10 @@ def button(update, context):
 
 
 # Retrieves the user's products from the database
-def get_user_products(user_id):
+def get_user_products(user_ID):
 
     # Create a query to get all documents where 'user_id' matches the ID of the user who sent the message
-    query_ref = db.collection('user_data').where('user_id', '==', user_id)
+    query_ref = db.collection('user_data').where('user_ID', '==', user_ID)
 
     # Run the query and get all matching documents
     docs = query_ref.stream()
@@ -377,7 +403,7 @@ def get_user_products(user_id):
 
     for doc in docs:
         data = doc.to_dict()
-        products_list.append(Product(data['product_name'], data['product_url'], data['product_price'], data['product_asin'], doc.id ))
+        products_list.append(Product(data['product_name'], data['product_asin'], data['product_price'], data['product_availability'], data['product_url'], data['user_ID'], data['doc_ID']))
 
     return products_list
 
@@ -403,6 +429,7 @@ def name_callback(update, context):
     else:
         update.message.reply_text(strings['default_message'].format(custom_name=custom_name))
 
+
 def get_stat(update, context):
 
     docs = db.collection('user_data').stream()
@@ -410,14 +437,14 @@ def get_stat(update, context):
 
     for doc in docs:
         data = doc.to_dict()
-        user_list.append(data['user_id'])
+        user_list.append(data['user_ID'])
 
     n_products = len(user_list)
     n_users = len(set(user_list))
 
     # Send the information to the developer
-    dev_text = f"-----------------------------\n📊 BOT STATISTICS\n-----------------------------\n\n📦 Tracked products: {n_products}\n\n👥 Users: {n_users}"
-    context.bot.send_message(chat_id=DEV_ID, text=dev_text)
+    dev_text = f"--------------------------------------------------------------\n<strong>BOT STATISTICS</strong> 📊 \n--------------------------------------------------------------\n\n📦 <strong>Tracked Products</strong>: {n_products}\n\n👥 <strong>Users</strong>: {n_users}"
+    context.bot.send_message(chat_id=DEV_ID, text=dev_text, parse_mode='HTML')
 
 
 def main():
@@ -430,20 +457,20 @@ def main():
 
     # Add handlers
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler('stop', stop))
-    dp.add_handler(CommandHandler('set_language', set_language))
-    dp.add_handler(CommandHandler('help', help))
-    dp.add_handler(CommandHandler('coffee', coffee))
     dp.add_handler(CommandHandler('view_tracked', view_tracked_products))
-    dp.add_handler(MessageHandler(Filters.text & Filters.entity("url"), track), group=0)
+    dp.add_handler(CommandHandler('help', help))
+    dp.add_handler(CommandHandler('set_language', set_language))
     dp.add_handler(CommandHandler('set_username', set_username), group=1)
+    dp.add_handler(CommandHandler('coffee', coffee))
+    dp.add_handler(CommandHandler('dev', get_stat))
+    dp.add_handler(CommandHandler('report', report))
+    dp.add_handler(MessageHandler(Filters.text & Filters.entity("url"), track), group=0)
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.entity("url"), name_callback))
     dp.add_handler(CallbackQueryHandler(button))
-    dp.add_handler(CommandHandler('dev', get_stat))
 
 
-    # Add a job to check the price every 1 minute
-    job_queue.run_repeating(check_price, interval=60, first=0)
+    # Add a job to check the price every 6 hours
+    job_queue.run_repeating(check_price, interval=21600, first=0)
     
     updater.start_polling()
     updater.idle()
