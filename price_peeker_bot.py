@@ -35,7 +35,7 @@ import time, random
 from translations import it_strings, en_strings
 from functools import wraps
 from collections import defaultdict
-from bot_constant import DEV_ID, AMAZON_ACCESS_KEY, AMAZON_AFFILIATE_TAG, AMAZON_ASSOC_TAG, AMAZON_SECRET_KEY, AMAZON_COUNTRY, TOKEN
+from bot_constant import DEV_ID, AMAZON_ACCESS_KEY, AMAZON_ASSOC_TAG, AMAZON_SECRET_KEY, AMAZON_COUNTRY, TOKEN
 from amazon_paapi import AmazonApi
 
 
@@ -161,7 +161,7 @@ def generate_affiliate_link(asin):
 
 # Function that generates a link to add a product directly to the cart
 def generate_add_to_cart_link(asin):
-    url = f'https://www.amazon.it/gp/aws/cart/add.html?ASIN.1={asin}&Quantity.1=1&AssociateTag={AMAZON_AFFILIATE_TAG}'
+    url = f'https://www.amazon.it/gp/aws/cart/add.html?ASIN.1={asin}&Quantity.1=1&AssociateTag={AMAZON_ASSOC_TAG}'
 
     return url
 
@@ -403,7 +403,7 @@ def get_user_products(user_ID):
 
     for doc in docs:
         data = doc.to_dict()
-        products_list.append(Product(data['product_name'], data['product_asin'], data['product_price'], data['product_availability'], data['product_url'], data['user_ID'], data['doc_ID']))
+        products_list.append(Product(data['product_name'], data['product_asin'], data['product_price'], data['product_url'], data['user_ID'], data['doc_ID']))
 
     return products_list
 
