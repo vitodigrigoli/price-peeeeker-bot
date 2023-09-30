@@ -5,19 +5,19 @@ LISTA COMANDI
 
 start - Welcome message
 view_tracked - View all currently tracked products
+help - How to use the bot correctly
 set_language - Select the bot language
 set_username - Choose the name the bot will use to call you
-help - How to use the bot correctly
-coffee - Thank the developer for saving you money on Amazon
 report - Report a bug to the developer
+coffee - Thank the developer
 
 start - Inizia a usare il bot
-view_tracked - Visualizza tutti i prodotti attualmente tracciati
+view_tracked - Visualizza i prodotti tracciati
 help - Come usare il bot correttamente
 set_language - Seleziona la lingua del bot
-set_username - Scegli il nome che userà il bot per chiamarti
+set_username - Scegli un nome personaizzato
 report - Segnala un bug allo sviluppatore
-coffee - Ringrazia lo sviluppatore per averti farti risparmiare soldi su Amazon
+coffee - Ringrazia lo sviluppatore
 
 
 """
@@ -86,15 +86,15 @@ def language_handler(func):
 @language_handler
 def start(update, context):
     strings = context.user_data['strings']
-    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
-    update.message.reply_text(strings['welcome'].format(custom_name=custom_name), parse_mode='HTML')
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
+    update.message.reply_text(strings['welcome'].format(custom_name=custom_name), parse_mode='HTML', disable_web_page_preview=True)
 
 
 # Function to generate a report message
 @language_handler
 def report(update, context):
     strings = context.user_data['strings']
-    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     keyboard = [
             [
@@ -110,7 +110,7 @@ def report(update, context):
 @language_handler
 def coffee(update, context):
     strings = context.user_data['strings']
-    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     keyboard = [
             [
@@ -139,10 +139,10 @@ def set_language(update, context):
 # Function that generates a help message
 def help(update, context):
     strings = context.user_data['strings']
-    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     commands = "\n".join([f"🔹 /{command} - <em>{description}</em>\n" for command, description in strings["commands"].items()])
-    update.message.reply_text(strings["help"].format(custom_name=custom_name) + commands, parse_mode='HTML')
+    update.message.reply_text(strings["help"].format(custom_name=custom_name) + commands, parse_mode='HTML', disable_web_page_preview=True)
 
 
 # Function to generate an Amazon affiliate link
@@ -176,18 +176,21 @@ def extract_amazon_link(text):
     # Cerca link Amazon standard e shortlinks
     regex = r'(https?://(?:www\.amazon\.[a-zA-Z]{2,3}/.+|amzn\.[a-zA-Z]{2,3}/.+))'
 
-    link = re.findall(regex, text)[0]
+    try:
+        link = re.findall(regex, text)[0]
 
-    # Se non ci sono link, ritorna None
-    if not link:
+        # Se non ci sono link, ritorna None
+        if not link:
+            link = None
+
+        # Controlla se il link è uno shortlink
+        if 'amzn' in link:
+            link = get_full_url_from_shortlink(link)
+        
+    except:
         return None
 
-    # Controlla se il link è uno shortlink
-    if 'amzn' in link:
-        return get_full_url_from_shortlink(link)
-    
     return link
-
 
 # Function to extract price from Amazon link
 def get_amazon_product(url):
@@ -212,13 +215,14 @@ def track (update, context):
 
     user_ID = update.message.from_user.id
     strings = context.user_data['strings']
-    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     # Find URL in message
     message = update.message.text
     url = extract_amazon_link(message)
 
     if url:
+        update.message.reply_text(strings['retrieving '].format(custom_name=custom_name), parse_mode='HTML')
         print(url)
         name, asin, price, affiliate_url = get_amazon_product(url)
         product = Product(name, asin, price, affiliate_url, user_ID)
@@ -229,7 +233,7 @@ def track (update, context):
         update.message.reply_text(strings['tracking'].format(custom_name=custom_name))
        
     else:
-        print("URL valid not found in message.")
+        update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
 
 
 # Function that adds a product to be tracked to the database
@@ -321,7 +325,7 @@ def view_tracked_products(update, context):
     tracked_products = get_user_products(user_ID)
 
     strings = context.user_data['strings']
-    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     for product in tracked_products:
         print(product)
@@ -418,13 +422,11 @@ def set_username(update, context):
 @language_handler
 def name_callback(update, context):
     strings = context.user_data['strings']
-    custom_name = context.user_data.get('custom_name', '')  # Use empty string as the default username
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     if context.user_data.get('set_username'):
-        custom_name = f" {update.message.text}"
-        context.user_data['custom_name'] = custom_name
-        
-        update.message.reply_text(strings['selected_username'].format(custom_name=custom_name))
+        context.user_data['custom_name'] = update.message.text
+        update.message.reply_text(strings['selected_username'].format(custom_name=update.message.text))
         context.user_data['set_username'] = False
     else:
         update.message.reply_text(strings['default_message'].format(custom_name=custom_name))
