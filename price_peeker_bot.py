@@ -27,23 +27,31 @@ coffee - Ringrazia lo sviluppatore
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackContext, Updater, Filters, MessageHandler, CallbackQueryHandler, ConversationHandler
 import requests
-from bs4 import BeautifulSoup
 import re
 import firebase_admin
 from firebase_admin import credentials, firestore
-import time, random
+import time
 from translations import it_strings, en_strings
 from functools import wraps
-from collections import defaultdict
-from bot_constant import DEV_ID, AMAZON_ACCESS_KEY, AMAZON_ASSOC_TAG, AMAZON_SECRET_KEY, AMAZON_COUNTRY, TOKEN
 from amazon_paapi import AmazonApi
-
+import os
+import json
 
 # Constant
 NOT_AVAILABLE = 99999
 
-# Initialization Firebase
-cred = credentials.Certificate("price-peeker-bot-firebase-adminsdk-i71n8-df7db42e8b.json")
+# Get enviroment variables
+FIREBASE_CREDENTIALS_JSON = os.environ.get('FIREBASE_CREDENTIALS_JSON')
+AMAZON_ACCESS_KEY = os.environ.get('AMAZON_ACCESS_KEY')
+AMAZON_SECRET_KEY = os.environ.get('AMAZON_SECRET_KEY')
+AMAZON_ASSOC_TAG = os.environ.get('AMAZON_ASSOC_TAG')
+AMAZON_COUNTRY = os.environ.get('AMAZON_COUNTRY')
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+
+
+# Initialization Firestore DB
+cred_dict = json.loads(FIREBASE_CREDENTIALS_JSON)
+cred = credentials.Certificate(cred_dict)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -192,7 +200,7 @@ def extract_amazon_link(text):
 
     return link
 
-# Function to extract price from Amazon link
+# Function to get Amazon product info
 def get_amazon_product(url):
     
     item = amazon.get_items(url)[0]
@@ -247,9 +255,10 @@ def add_to_database(product: Product):
         'product_asin':  product.asin,
         'product_price': product.price,
         'product_url': product.url,
-        'user_ID': product.user_ID,
-        'doc_ID': doc_ref.id
+        'user_ID': product.user_ID
     })
+    
+    product.doc_ID = doc_ref.id
 
 
 # Function that removes a tracked product from the database
@@ -407,7 +416,7 @@ def get_user_products(user_ID):
 
     for doc in docs:
         data = doc.to_dict()
-        products_list.append(Product(data['product_name'], data['product_asin'], data['product_price'], data['product_url'], data['user_ID'], data['doc_ID']))
+        products_list.append(Product(data['product_name'], data['product_asin'], data['product_price'], data['product_url'], data['user_ID'], doc.id))
 
     return products_list
 
@@ -452,7 +461,7 @@ def get_stat(update, context):
 def main():
     
     # Initialization Bot
-    updater = Updater(TOKEN)
+    updater = Updater(BOT_TOKEN)
     dp = updater.dispatcher
     job_queue = updater.job_queue
 
