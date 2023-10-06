@@ -482,7 +482,7 @@ def main():
 
 
     # Add a job to check the price every 6 hours
-    job_queue.run_repeating(check_price, interval=60, first=0)
+    job_queue.run_repeating(check_price, interval=21600, first=0)
     
     updater.start_polling()
     updater.idle()
