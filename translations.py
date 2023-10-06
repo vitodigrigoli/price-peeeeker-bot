@@ -4,7 +4,7 @@ it_strings = {
     "choose_username": "Come preferisci essere chiamato? 🫣",
     "selected_username": "Ciao {custom_name}! Lieto di conoscerti 🤗",
     "default_message": "Mi dispiace {custom_name}, ma non sono ancora bravo a conversare 🥺\n\nPuoi condividermi un link Amazon da tracciare invece. Beh, almeno quello so farlo bene.\n\nCredo...",
-    "tracking": "✅ Sto tracciando il tuo prodotto correttamente.\n\n⏰ Ti avviserò io quando si abbasserà di prezzo.",
+    "tracking": "✅ Sto tracciando il tuo prodotto correttamente.\n\n⏰ Ti avviserò io quando si abbasserà di prezzo o tornerà disponibile.",
     "help": "Ciao {custom_name}! Hai bisogno di aiuto? 🤭\n\nEccoti un tutorial su come usarmi correttamente: https://youtube.com/shorts/HlG2XXDhtUI?feature=share \n\n--------------------------------------------------------------\n<strong>LISTA DEI COMANDI DISPONIBILI 🫵</strong>\n--------------------------------------------------------------\n\n",
     "commands": {
         "start": "Inizia a usare il bot",
@@ -39,7 +39,7 @@ en_strings = {
     "choose_username": "How would you like to be called? 🫣",
     "selected_username": "Hello {custom_name}! Nice to meet you 🤗",
     "default_message": "I'm sorry {custom_name}, but I'm not good at chatting yet 🥺\n\nYou can share an Amazon link for me to track instead. Well, at least I can do that well.\n\nI think...",
-    "tracking": "✅ I'm successfully tracking your product.\n\n⏰ I'll notify you when its price drops.",
+    "tracking": "✅ I'm successfully tracking your product.\n\n⏰ I'll notify you when its price drops or becomes available again.",
     "help": "Hello {custom_name}! Need help? 🤭\n\nHere's a tutorial on how to use me correctly: https://youtube.com/shorts/HlG2XXDhtUI?feature=share \n\n--------------------------------------------------------------\n<strong>LIST OF AVAILABLE COMMANDS 🫵</strong>\n--------------------------------------------------------------\n\n",
     "commands": {
         "start": "Start using the bot",

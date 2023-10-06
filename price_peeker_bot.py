@@ -47,7 +47,7 @@ AMAZON_SECRET_KEY = os.environ.get('AMAZON_SECRET_KEY')
 AMAZON_ASSOC_TAG = os.environ.get('AMAZON_ASSOC_TAG')
 AMAZON_COUNTRY = os.environ.get('AMAZON_COUNTRY')
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
-
+DEV_ID = os.environ.get('DEV_ID')
 
 # Initialization Firestore DB
 cred_dict = json.loads(FIREBASE_CREDENTIALS_JSON)
@@ -158,11 +158,11 @@ def generate_affiliate_link(asin):
 
     url = "https://www.amazon.it/dp/" +  asin
 
-    if AMAZON_AFFILIATE_TAG:
+    if AMAZON_ASSOC_TAG:
         if '?' in url:
-            return f"{url}&tag={AMAZON_AFFILIATE_TAG}"
+            return f"{url}&tag={AMAZON_ASSOC_TAG}"
         else:
-            return f"{url}?tag={AMAZON_AFFILIATE_TAG}"
+            return f"{url}?tag={AMAZON_ASSOC_TAG}"
     else:
         return url
 
@@ -286,7 +286,7 @@ def check_price(context):
         user_ID = data['user_ID']
         product_url = data['product_url']
         initial_price = data['product_price']
-        doc_ID = data['doc_ID']
+        doc_ID = doc.id
         
         name, asin, price, affiliate_url = get_amazon_product(product_url)
         product = Product(name, asin, price, affiliate_url, user_ID, doc_ID)
@@ -465,6 +465,7 @@ def main():
     dp = updater.dispatcher
     job_queue = updater.job_queue
 
+    print("The bot is about to launch...")
 
     # Add handlers
     dp.add_handler(CommandHandler("start", start))
@@ -481,7 +482,7 @@ def main():
 
 
     # Add a job to check the price every 6 hours
-    job_queue.run_repeating(check_price, interval=21600, first=0)
+    job_queue.run_repeating(check_price, interval=60, first=0)
     
     updater.start_polling()
     updater.idle()
