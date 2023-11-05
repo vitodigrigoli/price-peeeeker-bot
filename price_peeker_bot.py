@@ -28,20 +28,21 @@ from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackContext, Updater, Filters, MessageHandler, CallbackQueryHandler, ConversationHandler
 import requests
 import re
-import firebase_admin
-from firebase_admin import credentials, firestore
+
 import time
 from translations import it_strings, en_strings
 from functools import wraps
 from amazon_paapi import AmazonApi
 import os
-import json
+
+from db_utils import migration
+from product import Product
+
 
 # Constant
 NOT_AVAILABLE = 99999
 
 # Get enviroment variables
-FIREBASE_CREDENTIALS_JSON = os.environ.get('FIREBASE_CREDENTIALS_JSON')
 AMAZON_ACCESS_KEY = os.environ.get('AMAZON_ACCESS_KEY')
 AMAZON_SECRET_KEY = os.environ.get('AMAZON_SECRET_KEY')
 AMAZON_ASSOC_TAG = os.environ.get('AMAZON_ASSOC_TAG')
@@ -49,29 +50,9 @@ AMAZON_COUNTRY = os.environ.get('AMAZON_COUNTRY')
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 DEV_ID = os.environ.get('DEV_ID')
 
-# Initialization Firestore DB
-cred_dict = json.loads(FIREBASE_CREDENTIALS_JSON)
-cred = credentials.Certificate(cred_dict)
-firebase_admin.initialize_app(cred)
-db = firestore.client()
-
 # Crea un'istanza di Amazon
 amazon = AmazonApi(AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOC_TAG, AMAZON_COUNTRY, throttling=10)
 
-
-# Definition of the Product class
-class Product:
-    def __init__(self, name="Default Name", asin='XXXXXXXXXX', price=0, url="https://default.url", user_ID='XXXXXXXXXX', doc_ID='XXXXXXXXXX'):
-        self.name = name
-        self.asin = asin
-        self.url = url
-        self.price = price
-        self.user_ID = user_ID
-        self.doc_ID = doc_ID
-
-
-    def __repr__(self):
-        return f"Product(name='{self.name}', asin={self.asin}, prezzo={self.price}, url='{self.url}', user_ID={self.user_ID}, doc_ID={self.doc_ID})"
 
 
 # Decorator that checks the user's language and sets the correct strings in the bot's context
@@ -244,21 +225,7 @@ def track (update, context):
         update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
 
 
-# Function that adds a product to be tracked to the database
-def add_to_database(product: Product):
-    doc_ref = db.collection('user_data').document()
 
-    print(doc_ref.id)
-
-    doc_ref.set({
-        'product_name': product.name,
-        'product_asin':  product.asin,
-        'product_price': product.price,
-        'product_url': product.url,
-        'user_ID': product.user_ID
-    })
-    
-    product.doc_ID = doc_ref.id
 
 
 # Function that removes a tracked product from the database
@@ -458,6 +425,13 @@ def get_stat(update, context):
     context.bot.send_message(chat_id=DEV_ID, text=dev_text, parse_mode='HTML')
 
 
+
+
+
+
+
+
+
 def main():
     
     # Initialization Bot
@@ -466,6 +440,8 @@ def main():
     job_queue = updater.job_queue
 
     print("The bot is about to launch...")
+
+    migration()
 
     # Add handlers
     dp.add_handler(CommandHandler("start", start))
