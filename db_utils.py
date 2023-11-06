@@ -37,7 +37,7 @@ def users_migration():
             # Il documento non esiste, quindi crealo
             user_data = {
                 'is_premium': True,
-                'tracked_products': []
+                'tracked_products': {}
             }
             user_ref.set(user_data)
             print(f"Documento creato per l'utente {user_ID} con dati premium e tracked_products.")
@@ -99,14 +99,12 @@ def users_products_migration():
         else:
             target_price = round( data['product_price'] - data['product_price'] / 100 * 2, 2)
 
-
+        product_key = f'tracked_products.{product_ID}'
         user_ref.update({
-            'tracked_products': firestore.ArrayUnion([{'ref_product_ID': ref_product_ID, 'target_price': target_price }])
+            product_key: target_price
         })
 
     print("Users Products Migration Done!")
-
-
 
 
 
@@ -119,33 +117,62 @@ def add_user(user: User):
         'is_premium': user.is_premium
     })
 
-# Function that adds a user to the database
+
+# Function that adds a product to the database
 def add_product(product: Product):
     doc_ref = db.collection('products').document(product.ID)
 
     doc_ref.set({
-        'product_name': product.name,
-        'product_url': product.url,
-        'product_current_price':  product.current_price,
-        'product_target_price': product.target_price,
-        'product_history': product.history
+        'name': product.name,
+        'url': product.url,
+        'price':  product.price,
+        'history': product.history
     })
 
+def delete_user(user_ID):
+
+    ref_user = db.collection('users').document(user_ID)
+    doc = ref_user.get()
+
+    if doc.exists:
+        ref_user.delete()
+        print(f'The user {user_ID} was successfully removed')
+    else:
+        print(f'The user {user_ID} was not found')
 
 
+def delete_product(product_ID):
+    ref_user = db.collection('products').document(product_ID)
+    doc = ref_user.get()
 
+    if doc.exists:
+        ref_user.delete()
+        print(f'The product {product_ID} was successfully removed')
+    else:
+        print(f'The product {product_ID} was not found')
+
+
+def delete_tracked_product(user_ID, product_ID):
+
+    # Reference to the user's document
+    user_ref = db.collection('users').document(user_ID)
+
+    # Construct the key to remove the product from the dictionary
+    product_key = f'tracked_products.{product_ID}'
+
+     # Update to remove the product
+    try:
+        user_ref.update({product_key: firestore.DELETE_FIELD})
+        print(f"Product with ID {product_ID} removed from user {user_ID}.")
+    except Exception as e:
+        print(f"Error while removing the product: {e}")
 
 
 
 def main():
 
-    u = User(ID='12365478')
 
-    users_migration()
-    products_migration()
-    users_products_migration()
-    add_user(u)
-
+    delete_tracked_product('37104959', '123456789')
 
 
 if __name__ == '__main__':
