@@ -35,7 +35,7 @@ import os
 from datetime import datetime
 
 
-from db_utils import add_user, add_product, add_tracked_product, get_tracked_products, get_product, delete_tracked_product
+from db_utils import add_user, add_product, add_tracked_product, get_tracked_products, get_product, delete_tracked_product, set_price_target
 from amazon_utils import extract_amazon_link, get_amazon_product, generate_add_to_cart_link
 
 from product import Product
@@ -258,6 +258,7 @@ def print_products(update, context, products):
             [
                 InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{user_ID}_{product_ID}'),
                 InlineKeyboardButton(strings['view_button'], url=product['url']),
+                InlineKeyboardButton('Cambia soglia', callback_data=f'threshold:{user_ID}_{product_ID}'),
             ],
             [
                 InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product_ID)),
@@ -300,6 +301,11 @@ def button(update, context):
         else:
             context.user_data['language'] = 'en'
             text = "✅ The language has been selected correctly"
+
+    elif action == 'threshold':
+        user_ID, product_ID = value.split('_')
+        change_threshold(update, context, user_ID, product_ID)
+        text = "✅ Inserisci la nuova soglia"
         
     else:
         print("button default behavior")
@@ -307,29 +313,22 @@ def button(update, context):
     query.edit_message_text(text=text)
 
 
-# Retrieves the user's products from the database
-def get_user_products(user_ID):
-
-    # Create a query to get all documents where 'user_id' matches the ID of the user who sent the message
-    query_ref = db.collection('user_data').where('user_ID', '==', user_ID)
-
-    # Run the query and get all matching documents
-    docs = query_ref.stream()
-
-    products_list = []
-
-    for doc in docs:
-        data = doc.to_dict()
-        products_list.append(Product(data['product_name'], data['product_asin'], data['product_price'], data['product_url'], data['user_ID'], doc.id))
-
-    return products_list
-
-
 @language_handler
 def set_username(update, context):
     strings = context.user_data['strings']
     update.message.reply_text(strings['choose_username'])
+
     context.user_data['set_username'] = True
+    
+
+
+@language_handler
+def change_threshold(update, context, user_ID, product_ID):
+    strings = context.user_data['strings']
+
+    context.user_data['set_price_target'] = True
+    context.user_data['user_ID'] = user_ID
+    context.user_data['product_ID'] = product_ID
 
 
 @language_handler
@@ -341,6 +340,25 @@ def name_callback(update, context):
         context.user_data['custom_name'] = update.message.text
         update.message.reply_text(strings['selected_username'].format(custom_name=update.message.text))
         context.user_data['set_username'] = False
+
+    elif context.user_data.get('set_price_target'):
+
+        user_ID = context.user_data.get('user_ID')
+        product_ID = context.user_data.get('product_ID')
+
+        try:
+            new_price_target = float(update.message.text)
+
+            print([user_ID, product_ID])
+            set_price_target(user_ID, product_ID, new_price_target)
+            update.message.reply_text('Soglia cambiata con successo')
+            context.user_data['set_price_target'] = False
+           
+        except Exception as e:
+            print(f"Error while entering the new price target: {e}")
+            update.message.reply_text('Il valore inserito non è valido')
+
+
     else:
         update.message.reply_text(strings['default_message'].format(custom_name=custom_name))
 
@@ -360,12 +378,6 @@ def get_stat(update, context):
     # Send the information to the developer
     dev_text = f"--------------------------------------------------------------\n<strong>BOT STATISTICS</strong> 📊 \n--------------------------------------------------------------\n\n📦 <strong>Tracked Products</strong>: {n_products}\n\n👥 <strong>Users</strong>: {n_users}"
     context.bot.send_message(chat_id=DEV_ID, text=dev_text, parse_mode='HTML')
-
-
-
-
-
-
 
 
 

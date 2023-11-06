@@ -109,7 +109,6 @@ def users_products_migration():
     print("Users Products Migration Done!")
 
 
-
 # Function that adds a user to the users collection
 def add_user(user_ID):
 
@@ -126,7 +125,7 @@ def add_user(user_ID):
         print(f'The user {user_ID} already exists')
 
 
-# Function that adds a product to the products colectione
+# Function that adds a product to the products collection
 def add_product(product: Product):
     product_ref = db.collection('products').document(product.ID)
     doc = product_ref.get()
@@ -144,6 +143,7 @@ def add_product(product: Product):
         print(f'The product {product.ID} already exists')
 
 
+# Function that adds a tracked product to the users collection
 def add_tracked_product(user_ID, product_ID, target_price):
     
     # Reference to the user's document
@@ -159,7 +159,8 @@ def add_tracked_product(user_ID, product_ID, target_price):
     except Exception as e:
         print(f"Error while add the tracked product: {e}")
 
-# Function that remove a product from the users collection
+
+# Function that removes a product from the users collection
 def delete_user(user_ID):
 
     ref_user = db.collection('users').document(user_ID)
@@ -172,7 +173,7 @@ def delete_user(user_ID):
         print(f'The user {user_ID} was not found')
 
 
-# Function that remove a product from the products collection
+# Function that removes a product from the products collection
 def delete_product(product_ID):
     ref_user = db.collection('products').document(product_ID)
     doc = ref_user.get()
@@ -183,7 +184,8 @@ def delete_product(product_ID):
     else:
         print(f'The product {product_ID} was not found')
 
-# Function that remove a tracked product from the user
+
+# Function that removes a tracked product from the user
 def delete_tracked_product(user_ID, product_ID):
 
     # Reference to the user's document
@@ -192,14 +194,15 @@ def delete_tracked_product(user_ID, product_ID):
     # Construct the key to remove the product from the dictionary
     product_key = f'tracked_products.{product_ID}'
 
-     # Update to remove the product
+    # Update to remove the product
     try:
         user_ref.update({product_key: firestore.DELETE_FIELD})
-        print(f"Product with ID {product_ID} removed from user {user_ID}.")
+        print(f"Product with ID {product_ID} has been removed from user {user_ID}.")
     except Exception as e:
         print(f"Error while removing the product: {e}")
 
 
+# Function that gets a product from products collection
 def get_product(product_ID):
      # Reference to the products' document
     product_ref = db.collection('products').document(product_ID)
@@ -209,13 +212,13 @@ def get_product(product_ID):
     if product_doc.exists:
 
         product_data = product_doc.to_dict()
-
         return product_data
 
     else:
         print("Product not found")
 
 
+# Function that gets a tracked products from users collection
 def get_tracked_products(user_ID):
 
     # Reference to the user's document
@@ -234,7 +237,20 @@ def get_tracked_products(user_ID):
     else:
         print("User not found")
 
+def set_price_target(user_ID, product_ID, new_price_target):
+    # Reference to the user's document
+    user_ref = db.collection('users').document(user_ID)
 
+    # Construct the key to remove the product from the dictionary
+    product_key = f'tracked_products.{product_ID}'
+
+    # Update to remove the product
+    try:
+        user_ref.update({product_key: new_price_target})
+        print(f"The user {user_ID} changed the price target of product {product_ID} to {new_price_target}.")
+    except Exception as e:
+        print(f"Error while changing the price target: {e}")
+    
 
 
 
