@@ -4,6 +4,7 @@ from firebase_admin import credentials, firestore
 import json
 from product import Product
 from user import User
+from datetime import datetime
 
 
 # Get enviroment variables
@@ -57,6 +58,7 @@ def products_migration():
         product_ref = db.collection('products').document(product_asin)
 
         product_doc = product_ref.get()
+        current_date = datetime.now().strftime("%Y-%m-%d")
 
         if product_doc.exists:
             print(f"Il documento per il prodotto {product_asin} esiste già.")
@@ -68,7 +70,7 @@ def products_migration():
                 'price': data['product_price'],
                 'history': [
                     {
-                        'date': '2023-11-05',
+                        'date': current_date,
                         'price': data['product_price'] 
                     }
                 ]
@@ -108,27 +110,56 @@ def users_products_migration():
 
 
 
-# Function that adds a user to the user collection
-def add_user(user: User):
-    doc_ref = db.collection('users').document(user.ID)
+# Function that adds a user to the users collection
+def add_user(user_ID):
 
-    doc_ref.set({
-        'tracked_products':  user.tracked_products,
-        'is_premium': user.is_premium
-    })
+    ref_user = db.collection('users').document(user_ID)
+    doc = ref_user.get()
+
+    if not doc.exists:
+        ref_user.set({
+            'tracked_products':  {},
+            'is_premium': False
+            })
+        print(f'The user {user_ID} was successfully added')
+    else:
+        print(f'The user {user_ID} already exists')
 
 
-# Function that adds a product to the database
+# Function that adds a product to the products colectione
 def add_product(product: Product):
-    doc_ref = db.collection('products').document(product.ID)
+    product_ref = db.collection('products').document(product.ID)
+    doc = product_ref.get()
 
-    doc_ref.set({
-        'name': product.name,
-        'url': product.url,
-        'price':  product.price,
-        'history': product.history
-    })
+    if not doc.exists:
+        product_ref.set({
+            'name': product.name,
+            'url': product.url,
+            'price':  product.price,
+            'history': product.history
+        })
+        print(f'The product {product.ID} was successfully added')
 
+    else:
+        print(f'The product {product.ID} already exists')
+
+
+def add_tracked_product(user_ID, product_ID, target_price):
+    
+    # Reference to the user's document
+    user_ref = db.collection('users').document(user_ID)
+
+    # Construct the key to remove the product from the dictionary
+    product_key = f'tracked_products.{product_ID}'
+
+    try:
+        user_ref.update({ product_key: target_price })
+        print(f"Product with ID {product_ID} has been added to user {user_ID}.")
+
+    except Exception as e:
+        print(f"Error while add the tracked product: {e}")
+
+# Function that remove a product from the users collection
 def delete_user(user_ID):
 
     ref_user = db.collection('users').document(user_ID)
@@ -141,6 +172,7 @@ def delete_user(user_ID):
         print(f'The user {user_ID} was not found')
 
 
+# Function that remove a product from the products collection
 def delete_product(product_ID):
     ref_user = db.collection('products').document(product_ID)
     doc = ref_user.get()
@@ -151,7 +183,7 @@ def delete_product(product_ID):
     else:
         print(f'The product {product_ID} was not found')
 
-
+# Function that remove a tracked product from the user
 def delete_tracked_product(user_ID, product_ID):
 
     # Reference to the user's document
@@ -168,11 +200,56 @@ def delete_tracked_product(user_ID, product_ID):
         print(f"Error while removing the product: {e}")
 
 
+def get_product(product_ID):
+     # Reference to the products' document
+    product_ref = db.collection('products').document(product_ID)
+
+    product_doc = product_ref.get()
+
+    if product_doc.exists:
+
+        product_data = product_doc.to_dict()
+
+        return product_data
+
+    else:
+        print("Product not found")
+
+
+def get_tracked_products(user_ID):
+
+    # Reference to the user's document
+    user_ref = db.collection('users').document(user_ID)
+
+    user_doc = user_ref.get()
+
+    if user_doc.exists:
+
+        user_data = user_doc.to_dict()
+        tracked_products = user_data.get('tracked_products', {})
+        print("Tracked Products:", tracked_products)
+
+        return tracked_products
+
+    else:
+        print("User not found")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def main():
 
-
-    delete_tracked_product('37104959', '123456789')
+    pass
 
 
 if __name__ == '__main__':

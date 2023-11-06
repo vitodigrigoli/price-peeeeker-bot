@@ -26,33 +26,28 @@ coffee - Ringrazia lo sviluppatore
 # Libraries
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackContext, Updater, Filters, MessageHandler, CallbackQueryHandler, ConversationHandler
-import requests
-import re
+
 
 import time
 from translations import it_strings, en_strings
 from functools import wraps
-from amazon_paapi import AmazonApi
 import os
+from datetime import datetime
 
-from db_utils import migration
+
+from db_utils import add_user, add_product, add_tracked_product, get_tracked_products, get_product, delete_tracked_product
+from amazon_utils import extract_amazon_link, get_amazon_product, generate_add_to_cart_link
+
 from product import Product
+from user import User
 
 
 # Constant
 NOT_AVAILABLE = 99999
 
 # Get enviroment variables
-AMAZON_ACCESS_KEY = os.environ.get('AMAZON_ACCESS_KEY')
-AMAZON_SECRET_KEY = os.environ.get('AMAZON_SECRET_KEY')
-AMAZON_ASSOC_TAG = os.environ.get('AMAZON_ASSOC_TAG')
-AMAZON_COUNTRY = os.environ.get('AMAZON_COUNTRY')
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 DEV_ID = os.environ.get('DEV_ID')
-
-# Crea un'istanza di Amazon
-amazon = AmazonApi(AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOC_TAG, AMAZON_COUNTRY, throttling=10)
-
 
 
 # Decorator that checks the user's language and sets the correct strings in the bot's context
@@ -76,7 +71,11 @@ def language_handler(func):
 def start(update, context):
     strings = context.user_data['strings']
     custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
+
     update.message.reply_text(strings['welcome'].format(custom_name=custom_name), parse_mode='HTML', disable_web_page_preview=True)
+
+    user_ID = str(update.message.from_user.id)
+    add_user(user_ID)
 
 
 # Function to generate a report message
@@ -134,75 +133,11 @@ def help(update, context):
     update.message.reply_text(strings["help"].format(custom_name=custom_name) + commands, parse_mode='HTML', disable_web_page_preview=True)
 
 
-# Function to generate an Amazon affiliate link
-def generate_affiliate_link(asin):
-
-    url = "https://www.amazon.it/dp/" +  asin
-
-    if AMAZON_ASSOC_TAG:
-        if '?' in url:
-            return f"{url}&tag={AMAZON_ASSOC_TAG}"
-        else:
-            return f"{url}?tag={AMAZON_ASSOC_TAG}"
-    else:
-        return url
-
-
-# Function that generates a link to add a product directly to the cart
-def generate_add_to_cart_link(asin):
-    url = f'https://www.amazon.it/gp/aws/cart/add.html?ASIN.1={asin}&Quantity.1=1&AssociateTag={AMAZON_ASSOC_TAG}'
-
-    return url
-
-
-def get_full_url_from_shortlink(shortlink):
-    response = requests.get(shortlink, allow_redirects=True)
-    return response.url
-
-
-# Function to extract a link within a message
-def extract_amazon_link(text):
-    # Cerca link Amazon standard e shortlinks
-    regex = r'(https?://(?:www\.amazon\.[a-zA-Z]{2,3}/.+|amzn\.[a-zA-Z]{2,3}/.+))'
-
-    try:
-        link = re.findall(regex, text)[0]
-
-        # Se non ci sono link, ritorna None
-        if not link:
-            link = None
-
-        # Controlla se il link è uno shortlink
-        if 'amzn' in link:
-            link = get_full_url_from_shortlink(link)
-        
-    except:
-        return None
-
-    return link
-
-# Function to get Amazon product info
-def get_amazon_product(url):
-    
-    item = amazon.get_items(url)[0]
-
-    name = item.item_info.title.display_value
-    asin = item.asin
-    affiliate_url = item.detail_page_url
-
-    try:
-        price = item.offers.listings[0].price.amount
-    except:
-        price = NOT_AVAILABLE
-
-    return name, asin, price, affiliate_url
-
-
 @language_handler
 # Function to send an Amazon affiliate link
 def track (update, context):
 
-    user_ID = update.message.from_user.id
+    user_ID = str(update.message.from_user.id)
     strings = context.user_data['strings']
     custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
@@ -213,29 +148,28 @@ def track (update, context):
     if url:
         update.message.reply_text(strings['retrieving '].format(custom_name=custom_name), parse_mode='HTML')
         print(url)
-        name, asin, price, affiliate_url = get_amazon_product(url)
-        product = Product(name, asin, price, affiliate_url, user_ID)
 
-        add_to_database(product)
+        product_ID, product_name, product_url, product_price = get_amazon_product(url)
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        product_history = {'date': current_date, 'price': product_price}
 
-        print_products(update, context, [product])
+        product = Product(product_ID, product_name, product_url, product_price, product_history)
+
+        if (product_price < 100):
+            target_price = round( product_price - product_price / 100 * 5, 2)
+        else:
+            target_price = round( product_price - product_price / 100 * 2, 2)
+
+        add_product(product)
+        add_tracked_product(user_ID, product.ID, target_price )
+
+        #print_products(update, context, [product])
         update.message.reply_text(strings['tracking'].format(custom_name=custom_name))
        
     else:
         update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
 
 
-
-
-
-# Function that removes a tracked product from the database
-def remove_from_database(doc_ID):
-    try:
-        db.collection('user_data').document(doc_ID).delete()
-        print(f'Documento con ID {doc_ID} eliminato con successo.')
-
-    except Exception as e:
-        print(f'Errore nell\'eliminare il documento: {e}')
 
 
 # Function that checks whether the price has dropped
@@ -297,14 +231,11 @@ def time_converter(elapsed_time):
 # Function that prints all the user's tracked products
 @language_handler
 def view_tracked_products(update, context):
-    user_ID = update.message.from_user.id
-    tracked_products = get_user_products(user_ID)
+    user_ID = str(update.message.from_user.id)
+    tracked_products = get_tracked_products(user_ID)
 
     strings = context.user_data['strings']
     custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
-
-    for product in tracked_products:
-        print(product)
 
     
     # Se la lista è vuota, invia un messaggio che indica che non ci sono elementi tracciati
@@ -317,26 +248,30 @@ def view_tracked_products(update, context):
 # Function that prints a list of products
 @language_handler
 def print_products(update, context, products):
-
+    user_ID = str(update.message.from_user.id)
     strings = context.user_data['strings']
 
-    for product in products:
+    for product_ID, price_target in products.items():
+        product = get_product(product_ID)
+
         keyboard = [
             [
-                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.doc_ID}'),
-                InlineKeyboardButton(strings['view_button'], url=product.url),
+                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{user_ID}_{product_ID}'),
+                InlineKeyboardButton(strings['view_button'], url=product['url']),
             ],
             [
-                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.asin)),
+                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product_ID)),
             ],
         ]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        if product.price != NOT_AVAILABLE:
-            update.message.reply_text(f'<strong>🛍️ {product.name}\n\n💰 {product.price} €</strong>\n\n🟢 {strings["available"]}\n\n🔗 {product.url}', reply_markup=reply_markup, parse_mode='HTML')
+        if product['price'] != NOT_AVAILABLE:
+            update.message.reply_text(f'<strong>🛍️ {product["name"]}\n\n💰 {product["price"]} €</strong>\n\n🟢 {strings["available"]}\n\n🎯{price_target}\n\n🔗 {product["url"]}', reply_markup=reply_markup, parse_mode='HTML')
         else:
-            update.message.reply_text(f'<strong>🛍️ {product.name}</strong>\n\n🔴 {strings["not_available"]}\n\n🔗 {product.url}', reply_markup=reply_markup, parse_mode='HTML')
+            update.message.reply_text(f'<strong>🛍️ {product["name"]}</strong>\n\n🔴 {strings["not_available"]}\n\n🔗 {product["url"]}', reply_markup=reply_markup, parse_mode='HTML')
+
+
 
 
 # Function that manages button callbacks
@@ -349,10 +284,12 @@ def button(update, context):
 
     # Analizzare i dati della callback
     action, value = query.data.split(':')
+    print(f'value: {value} action: {action}')
 
     if action == 'remove':
         # Delete the item with ID item_id
-        remove_from_database(value)
+        user_ID, product_ID = value.split('_')
+        delete_tracked_product(user_ID, product_ID)
         text = strings["remove"]
     
     elif action == 'lang':
@@ -441,8 +378,6 @@ def main():
 
     print("The bot is about to launch...")
 
-    migration()
-
     # Add handlers
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler('view_tracked', view_tracked_products))
@@ -458,7 +393,7 @@ def main():
 
 
     # Add a job to check the price every 6 hours
-    job_queue.run_repeating(check_price, interval=21600, first=0)
+    #job_queue.run_repeating(check_price, interval=21600, first=0)
     
     updater.start_polling()
     updater.idle()

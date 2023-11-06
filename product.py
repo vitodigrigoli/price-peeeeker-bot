@@ -1,6 +1,6 @@
 # Definition of the Product class
 class Product:
-    def __init__(self, ID='XXXXXXXXXX', name='Default Name', url='https://default.url', price=0, history=[] ):
+    def __init__(self, ID='XXXXXXXXXX', name='Default Name', url='https://default.url', price=0, history={} ):
         self.ID = ID
         self.name = name
         self.url = url
