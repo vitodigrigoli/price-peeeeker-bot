@@ -1,13 +1,12 @@
 # Definition of the Product class
 class Product:
-    def __init__(self, name="Default Name", asin='XXXXXXXXXX', price=0, url="https://default.url", user_ID='XXXXXXXXXX', doc_ID='XXXXXXXXXX'):
+    def __init__(self, ID='XXXXXXXXXX', name='Default Name', url='https://default.url', price=0, history=[] ):
+        self.ID = ID,
         self.name = name
-        self.asin = asin
         self.url = url
         self.price = price
-        self.user_ID = user_ID
-        self.doc_ID = doc_ID
+        self.history = history
 
 
     def __repr__(self):
-        return f"Product(name='{self.name}', asin={self.asin}, prezzo={self.price}, url='{self.url}', user_ID={self.user_ID}, doc_ID={self.doc_ID})"
+        return f"Product(ID='{self.ID}', name={self.name}, url='{self.url}', price={self.price}, history={self.history})"

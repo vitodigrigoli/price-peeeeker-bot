@@ -3,6 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import json
 from product import Product
+from user import User
 
 
 # Get enviroment variables
@@ -35,7 +36,7 @@ def users_migration():
         else:
             # Il documento non esiste, quindi crealo
             user_data = {
-                'premium': True,
+                'is_premium': True,
                 'tracked_products': []
             }
             user_ref.set(user_data)
@@ -62,12 +63,10 @@ def products_migration():
         else:
             # Il documento non esiste, quindi crealo
             product_data = {
-                'product_name':  data['product_name'],
-                'product_url': data['product_url'],
-                'product_current_price': data['product_price'],
-                'product_min_price': data['product_price'],
-                'product_max_price': data['product_price'],
-                'product_history': [
+                'name':  data['product_name'],
+                'url': data['product_url'],
+                'price': data['product_price'],
+                'history': [
                     {
                         'date': '2023-11-05',
                         'price': data['product_price'] 
@@ -76,7 +75,7 @@ def products_migration():
             }
 
             product_ref.set(product_data)
-            print(f"Documento creato per il prodotto {product_asin} con dati premium e tracked_products.")
+            print(f"Documento creato per il prodotto {product_asin}.")
         
     print("Products Migration Done!")
 
@@ -92,8 +91,17 @@ def users_products_migration():
         user_ID = str(data['user_ID'])
         user_ref = db.collection('users').document(user_ID)
 
+        product_ID = data['product_asin']
+        ref_product_ID = db.collection('products').document(product_ID)
+
+        if (data['product_price'] < 100):
+            target_price = round( data['product_price'] - data['product_price'] / 100 * 5, 2)
+        else:
+            target_price = round( data['product_price'] - data['product_price'] / 100 * 2, 2)
+
+
         user_ref.update({
-            'tracked_products': firestore.ArrayUnion([data['product_asin']])
+            'tracked_products': firestore.ArrayUnion([{'ref_product_ID': ref_product_ID, 'target_price': target_price }])
         })
 
     print("Users Products Migration Done!")
@@ -102,25 +110,26 @@ def users_products_migration():
 
 
 
-# Function that adds a product to be tracked to the database
-def add_to_database(product: Product):
-    doc_ref = db.collection('user_data').document()
+# Function that adds a user to the user collection
+def add_user(user: User):
+    doc_ref = db.collection('users').document(user.ID)
 
-    print(doc_ref.id)
+    doc_ref.set({
+        'tracked_products':  user.tracked_products,
+        'is_premium': user.is_premium
+    })
+
+# Function that adds a user to the database
+def add_product(product: Product):
+    doc_ref = db.collection('products').document(product.ID)
 
     doc_ref.set({
         'product_name': product.name,
-        'product_asin':  product.asin,
-        'product_price': product.price,
         'product_url': product.url,
-        'user_ID': product.user_ID
+        'product_current_price':  product.current_price,
+        'product_target_price': product.target_price,
+        'product_history': product.history
     })
-    
-    product.doc_ID = doc_ref.id
-
-
-
-
 
 
 
@@ -130,13 +139,12 @@ def add_to_database(product: Product):
 
 def main():
 
-    print("Refactoring DB...")
+    u = User(ID='12365478')
 
     users_migration()
     products_migration()
     users_products_migration()
-
-    print("Refactoring DB done!")
+    add_user(u)
 
 
 
