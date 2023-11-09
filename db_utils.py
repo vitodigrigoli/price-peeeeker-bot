@@ -1,21 +1,8 @@
-import os
-import firebase_admin
-from firebase_admin import credentials, firestore
-import json
-from product import Product
-from user import User
+from config import db
 from datetime import datetime
-
-
-# Get enviroment variables
-FIREBASE_CREDENTIALS_JSON = os.environ.get('FIREBASE_CREDENTIALS_JSON')
-
-# Initialization Firestore DB
-cred_dict = json.loads(FIREBASE_CREDENTIALS_JSON)
-cred = credentials.Certificate(cred_dict)
-firebase_admin.initialize_app(cred)
-db = firestore.client()
-
+from user import User
+from product import Product
+from amazon_utils import get_amazon_product
 
 
 def users_migration():
@@ -28,20 +15,9 @@ def users_migration():
         data = doc.to_dict()
 
         user_ID = str(data['user_ID'])
-        user_ref = db.collection('users').document(user_ID)
 
-        user_doc = user_ref.get()
-
-        if user_doc.exists:
-            print(f"Il documento per l'utente {user_ID} esiste già.")
-        else:
-            # Il documento non esiste, quindi crealo
-            user_data = {
-                'is_premium': True,
-                'tracked_products': {}
-            }
-            user_ref.set(user_data)
-            print(f"Documento creato per l'utente {user_ID} con dati premium e tracked_products.")
+        user = User(user_ID)
+        user.save()
 
     print("Users Migration Done!")
 
@@ -53,31 +29,23 @@ def products_migration():
 
     for doc in docs:
         data = doc.to_dict()
+        product_url = data['product_url']
 
-        product_asin = data['product_asin']
-        product_ref = db.collection('products').document(product_asin)
+        amazon_product = get_amazon_product(product_url, 'New')
 
-        product_doc = product_ref.get()
-        current_date = datetime.now().strftime("%Y-%m-%d")
-
-        if product_doc.exists:
-            print(f"Il documento per il prodotto {product_asin} esiste già.")
-        else:
-            # Il documento non esiste, quindi crealo
-            product_data = {
-                'name':  data['product_name'],
-                'url': data['product_url'],
-                'price': data['product_price'],
-                'history': [
-                    {
-                        'date': current_date,
-                        'price': data['product_price'] 
-                    }
-                ]
-            }
-
-            product_ref.set(product_data)
-            print(f"Documento creato per il prodotto {product_asin}.")
+        if( amazon_product ):
+            current_date = datetime.now().strftime("%Y-%m-%d")
+            product = Product(
+                amazon_product.get('ID'),
+                amazon_product.get('name'),
+                amazon_product.get('url'),
+                amazon_product.get('price'),
+                {
+                    current_date: amazon_product.get('price')
+                }
+            )
+            product.save()
+        
         
     print("Products Migration Done!")
 
@@ -94,20 +62,22 @@ def users_products_migration():
         user_ref = db.collection('users').document(user_ID)
 
         product_ID = data['product_asin']
-        ref_product_ID = db.collection('products').document(product_ID)
-
-        if (data['product_price'] < 100):
-            target_price = round( data['product_price'] - data['product_price'] / 100 * 5, 2)
-        else:
-            target_price = round( data['product_price'] - data['product_price'] / 100 * 2, 2)
+        price = data['product_price']
+        alert_price = generate_alert_price(data['product_price'])
 
         product_key = f'tracked_products.{product_ID}'
-        user_ref.update({
-            product_key: target_price
+        user_ref.update({ product_key: {'last_alerted_price': price, 'alert_price': alert_price }
         })
 
     print("Users Products Migration Done!")
 
+def migration():
+    users_migration()
+    products_migration()
+    users_products_migration()
+
+
+'''
 
 # Function that adds a user to the users collection
 def add_user(user_ID):
@@ -141,10 +111,13 @@ def add_product(product: Product):
 
     else:
         print(f'The product {product.ID} already exists')
+        product_ref.update({
+            'price':  product.price,
+        })
 
 
 # Function that adds a tracked product to the users collection
-def add_tracked_product(user_ID, product_ID, target_price):
+def add_tracked_product(user_ID, product_ID, price, alert_price):
     
     # Reference to the user's document
     user_ref = db.collection('users').document(user_ID)
@@ -153,7 +126,7 @@ def add_tracked_product(user_ID, product_ID, target_price):
     product_key = f'tracked_products.{product_ID}'
 
     try:
-        user_ref.update({ product_key: target_price })
+        user_ref.update({ product_key: {'last_alerted_price': price, 'alert_price': alert_price} })
         print(f"Product with ID {product_ID} has been added to user {user_ID}.")
 
     except Exception as e:
@@ -212,6 +185,7 @@ def get_product(product_ID):
     if product_doc.exists:
 
         product_data = product_doc.to_dict()
+        print(product_data)
         return product_data
 
     else:
@@ -237,21 +211,57 @@ def get_tracked_products(user_ID):
     else:
         print("User not found")
 
-def set_price_target(user_ID, product_ID, new_price_target):
+
+# Function that gets a tracked products from users collection
+def get_tracked_product(user_ID, product_ID):
+
+    # Reference to the user's document
+    user_ref = db.collection('users').document(user_ID)
+
+    user_doc = user_ref.get()
+
+    if user_doc.exists:
+
+        user_data = user_doc.to_dict()
+        print(user_data)
+        tracked_products = user_data.get('tracked_products', {})
+
+        product_info = tracked_products.get(product_ID)
+
+        if product_info:
+            print(product_info)
+            return product_info
+        else:
+            print(f"Product with ID {product_ID} not found for User {user_ID}.")
+            return None
+
+    else:
+        print("User not found")
+
+
+def set_alert_price(user_ID, product_ID, alert_price):
     # Reference to the user's document
     user_ref = db.collection('users').document(user_ID)
 
     # Construct the key to remove the product from the dictionary
-    product_key = f'tracked_products.{product_ID}'
+    product_key = f'tracked_products.{product_ID}.alert_price'
 
     # Update to remove the product
     try:
-        user_ref.update({product_key: new_price_target})
-        print(f"The user {user_ID} changed the price target of product {product_ID} to {new_price_target}.")
+        user_ref.update({product_key: alert_price})
+        print(f"The user {user_ID} changed the price target of product {product_ID} to {alert_price}.")
     except Exception as e:
         print(f"Error while changing the price target: {e}")
     
 
+def generate_alert_price(price):
+
+    if (price < 100):
+        alert_price = round( price - price / 100 * 5, 2)
+    else:
+        alert_price = round( price - price / 100 * 2, 2)
+
+    return alert_price
 
 
 
@@ -259,14 +269,11 @@ def set_price_target(user_ID, product_ID, new_price_target):
 
 
 
-
-
-
+'''
 
 def main():
-
-    pass
-
+    users_migration()
+    products_migration()
 
 if __name__ == '__main__':
     main()

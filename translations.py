@@ -17,9 +17,11 @@ it_strings = {
         # ... (aggiungi altre descrizioni di comandi qui)
     },
     "remove": "Rimosso ❌🫡",
-    "remove_button": "Rimuovi ❌",
-    "view_button": "Vedi su Amazon 👀",
-    "cart_button": "AGGIUNGI AL CARRELLO AMAZON ORA🤩",
+    "remove_button": "❌ Rimuovi",
+    "view_button": "👀 Vedi su Amazon",
+    "cart_button": "🤩 AGGIUNGI AL CARRELLO AMAZON ORA",
+    "threshold_button": "🎯 Cambia soglia",
+    "chart_button": "📊 Andamento prezzi",
     "list_empty": "Mi dispiace {custom_name}, ma non stai tracciando alcun prodotto al momento.\n\nPremi /help se hai bisogno di aiuto 🤦‍♂️",
     "coffee": "Ciao {custom_name}! 😇\n\nVedo che vuoi offrire un caffè al mio sviluppatore ☕️\n\nCon zucchero, grazie ⬇️\nhttps://www.paypal.me/vitodigrigoli",
     "coffee_button": "Offri SENZA ZUCCHERO 😈",
@@ -30,7 +32,11 @@ it_strings = {
     "invalid_link": "Il link che hai mandato non è valido. Manda link provenienti solo da Amazon 🛍️\n\nPremi /help per guardare il tutorial 🤦‍♂️",
     "available": "Disponibilità immediata",
     "not_available": "Non disponibile\n<em>Ti invierò una notifica non appena tornerà disponibile</em>",
-    "retrieving ": "<em>Sto recuperando il prodotto...</em>"
+    "retrieving ": "<em>Sto recuperando il prodotto...</em>",
+    "tracked_product--available":'<strong>🛍️ {name}\n\n💰</strong> Prezzo corrente <strong>{price} €</strong>\n\n🟢<em> Disponibilità immediata\n\n🎯Notifica quando arriva a {alert_price}\n\n🔔 Ultimo prezzo notificato <del>{last_alerted_price}</del></em>\n\n🔗 {url}',
+    "tracked_product--not_available":'<strong>🛍️ {name}\n\n💰</strong> Prezzo corrente {price} €</strong>\n\n🔴 Non disponibile\n\n🔔 Ultimo prezzo notificato <del>{last_alerted_price}</del>\n\n🔗 {url}'
+
+
 }
 
 en_strings = {
