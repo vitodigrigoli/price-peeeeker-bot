@@ -63,6 +63,35 @@ class User:
             return None
         
 
+    def add_product(self, product_data):
+        
+        # Reference to the user's document
+        user = User.get_user(self.ID)
+
+        if (not user):
+            user = User(self.ID)
+            user.save()
+        
+        # Get product data from the dictionary
+        product_ID = product_data.get("ID")
+        alert_price = product_data.get("alert_price")
+        last_alerted_price = product_data.get("last_alerted_price")
+
+        # Construct the key to remove the product from the dictionary
+        product_key = f'tracked_products.{product_ID}'
+
+        try:
+            user_ref = db.collection('users').document(user.ID)
+            user_ref.update({ product_key: {'last_alerted_price': last_alerted_price, 'alert_price': alert_price} })
+            print(f"Product with ID {product_ID} has been added to user {user.ID}.")
+
+        except Exception as e:
+            print(f"Error while add the tracked product: {e}")
+
+
+
+
+
 
 
 
@@ -72,8 +101,16 @@ def main():
     user = User('12345', True, 'it', {'BCM000000':{'alert_price': 25, 'last_alerted_price': 28.58}})
     user.save()
 
-    user_2 = User.get_user('12345')
-    print(user_2)
+    user_2 = User('123458', True, 'it', {'BCM000000':{'alert_price': 25, 'last_alerted_price': 28.58}})
+    
+    product_data = {
+        'ID': 'B456789',
+        'alert_price': 62,
+        'last_alerted_price': 62
+    }
+
+    user_2.add_product(product_data)
+
 
 
 if __name__ == '__main__':

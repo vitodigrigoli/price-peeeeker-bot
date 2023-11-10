@@ -52,20 +52,34 @@ def get_amazon_product(url, condition='Any'):
         print(f"Error while fetching Amazon product: {e}")
         return None
     
+    product_ID = product.asin
+    product_name = product.item_info.title.display_value
+    product_url = product.detail_page_url
+
+    try:
+        product_price = float(product.offers.listings[0].price.amount)
+
+    except Exception as e:
+        print(f"Product not available: {e}")
+
+        product_price = None
+        product_merchant = None
+
+        return {
+            'ID': product_ID,
+            'name': product_name,
+            'url': product_url,
+            'price': product_price,
+            'merchant': product_merchant
+        }
+    
 
     product_condition = product.offers.listings[0].condition.value
     
     if( condition=='New' or product_condition=='New' ):
-        
-        product_ID = product.asin
-        product_name = product.item_info.title.display_value
-        product_url = product.detail_page_url
+    
+        product_price = float(product.offers.listings[0].price.amount)
         product_merchant = product.offers.listings[0].merchant_info.name
-
-        try:
-            product_price = float(product.offers.listings[0].price.amount)
-        except:
-            product_price = None
 
         return {
             'ID': product_ID,
@@ -77,26 +91,6 @@ def get_amazon_product(url, condition='Any'):
 
     else:
         return 'Used'
-
-    
-    '''
-    if(condition=='New' | )
-
-
-    if item.item.offers.listings[0].condition.value == 'New':
-
-        name = item.item_info.title.display_value
-        ID = item.asin
-        url = item.detail_page_url
-
-        try:
-            price = float(item.offers.listings[0].price.amount)
-        except:
-            price = None
-
-        return ID, name, url, price
-'''
-
 
 
 # Function to get Amazon product info
@@ -116,8 +110,9 @@ def print_amazon_product(url, condition='Used'):
 
 def main():
 
-    url='https://www.amazon.it/dp/B09HTV221K?tag=price-peeker-21&linkCode=ogi&th=1&psc=1'
+    url='https://www.amazon.it/dp/B08THKDTTR?tag=price-peeker-21&linkCode=ogi&th=1&psc=1'
     amazon_product = get_amazon_product(url)
+    print(amazon_product)
 
     
 

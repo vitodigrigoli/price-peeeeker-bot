@@ -31,23 +31,15 @@ from telegram.ext import CommandHandler, CallbackContext, Updater, Filters, Mess
 import time
 from translations import it_strings, en_strings
 from functools import wraps
-import os
 from datetime import datetime
 
-
-from db_utils import add_user, add_product, add_tracked_product, get_tracked_products, get_product, delete_tracked_product, set_alert_price, get_tracked_product, generate_alert_price
 from amazon_utils import extract_amazon_link, get_amazon_product, generate_add_to_cart_link
+from toolbox import generate_alert_price
 
 from product import Product
 from user import User
+from config import DEV_ID, BOT_TOKEN
 
-
-# Constant
-NOT_AVAILABLE = 99999
-
-# Get enviroment variables
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
-DEV_ID = os.environ.get('DEV_ID')
 
 
 # Decorator that checks the user's language and sets the correct strings in the bot's context
@@ -75,7 +67,8 @@ def start(update, context):
 	update.message.reply_text(strings['welcome'].format(custom_name=custom_name), parse_mode='HTML', disable_web_page_preview=True)
 
 	user_ID = str(update.message.from_user.id)
-	add_user(user_ID)
+	user = User(user_ID)
+	user.save()
 
 
 # Function to generate a report message
@@ -157,21 +150,43 @@ def track (update, context):
 		update.message.reply_text(strings['retrieving '].format(custom_name=custom_name), parse_mode='HTML')
 		print(url)
 
-		product_ID, product_name, product_url, product_price = get_amazon_product(url)
-		current_date = datetime.now().strftime("%Y-%m-%d")
-		product_history = {'date': current_date, 'price': product_price}
+		amazon_product = get_amazon_product(url)
+		print(amazon_product)
 
-		product = Product(product_ID, product_name, product_url, product_price, product_history)
+		if(amazon_product == None):
+			update.message.reply_text('Amazon non fornisce informazioni su questo prodotto'.format(custom_name=custom_name))
 
-		alert_price = generate_alert_price(product_price)
+		elif(amazon_product == 'Used'):
+			update.message.reply_text('Il prodotto che vuoi tracciare è usato. Vuoi tracciare quello nuovo?'.format(custom_name=custom_name))
 
-		add_product(product)
-		add_tracked_product(user_ID, product.ID, product_price, alert_price )
+		else:
+			current_date = datetime.now().strftime("%Y-%m-%d")
+			product = Product(
+				amazon_product.get('ID'),
+				amazon_product.get('name'),
+				amazon_product.get('url'),
+				amazon_product.get('price'),
+				amazon_product.get('merchant'),
+				{
+					current_date: amazon_product.get('price')
+				}
+			)
+			product.save()
 
-		product_data = {'alert_price': alert_price, 'last_alerted_price': product_price}
+			user = User(user_ID)
 
-		#print_product(update, context, product_ID, product_data)
-		update.message.reply_text(strings['tracking'].format(custom_name=custom_name))
+			alert_price = generate_alert_price(product.price)
+			product_data = {
+				'ID': product.ID,
+				'alert_price': alert_price,
+				'last_alerted_price': product.price
+			}
+
+			print(product_data)
+			user.add_product(product_data)
+
+			#print_product(update, context, product_ID, product_data)
+			update.message.reply_text(strings['tracking'].format(custom_name=custom_name))
 	   
 	else:
 		update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))

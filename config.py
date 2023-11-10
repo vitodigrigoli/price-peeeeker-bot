@@ -10,6 +10,8 @@ AMAZON_ACCESS_KEY = os.environ.get('AMAZON_ACCESS_KEY')
 AMAZON_SECRET_KEY = os.environ.get('AMAZON_SECRET_KEY')
 AMAZON_ASSOC_TAG = os.environ.get('AMAZON_ASSOC_TAG')
 AMAZON_COUNTRY = os.environ.get('AMAZON_COUNTRY')
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
+DEV_ID = os.environ.get('DEV_ID')
 
 # Initialization Firestore DB
 cred_dict = json.loads(FIREBASE_CREDENTIALS_JSON)

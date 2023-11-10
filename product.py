@@ -37,10 +37,14 @@ class Product:
                 print(f'The product {self.ID} was successfully added')
 
             else:
-                print(f'The product {self.ID} already exists')
+                print(f'The product {self.ID} already exists. Update the price to {self.price}')
+                product_ref.update({
+                    'price':  self.price,
+                })
+
 
         except Exception as e:
-            print(f"Error while save the user: {e}")
+            print(f"Error while save the product: {e}")
         
 
         
