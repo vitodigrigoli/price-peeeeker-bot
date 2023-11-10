@@ -46,6 +46,39 @@ class Product:
         except Exception as e:
             print(f"Error while save the product: {e}")
         
+    @classmethod
+    def from_dict(cls, product_ID, product_data):
 
+        name = product_data.get('name')
+        url = product_data.get('url')
+        price = product_data.get('price')
+        merchant = product_data.get('merchant')
+        history = product_data.get('history')
+
+        return cls(product_ID, name, url, price, merchant, history)
+
+
+    @staticmethod
+    def get_product(product_ID):
+
+        product_ref = db.collection('products').document(product_ID)
+        product_doc = product_ref.get()
+
+        if product_doc.exists:
+            product_data = product_doc.to_dict()
+            return Product.from_dict(product_ID, product_data)
+        else:
+            return None
         
+        
+
+def main():
+
+    product = Product.get_product('B0BZJM3742')
+    print(product)
+
+
+if __name__ == '__main__':
+    main()
+
 

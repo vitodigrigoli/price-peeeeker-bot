@@ -10,7 +10,6 @@ it_strings = {
         "start": "Inizia a usare il bot",
         "view_tracked": "Visualizza tutti i prodotti attualmente tracciati",
         "help": "Come usare il bot correttamente",
-        "set_language": "Seleziona la lingua del bot",
         "set_username": "Scegli il nome che userà il bot per chiamarti",
         "report": "Segnala un bug allo sviluppatore",
         "coffee": "Ringrazia lo sviluppatore con un caffè",
@@ -27,14 +26,20 @@ it_strings = {
     "coffee_button": "Offri SENZA ZUCCHERO 😈",
     "price_dropped": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\nIl prezzo del prodotto è <strong>DIMINUITO</strong>! 🎉💰\n\n🛍️ <strong>{product_name}</strong>\n\n💲Passa da <del>{initial_price}€</del> a <strong>{product_price}€</strong>\n\n🔗 {product_url}",
     "report": "Ciao {custom_name}! Vuoi segnalare un bug o un'idea allo sviluppatore? 👨‍💻\n\nContattalo tramite il nostro bot di supporto:\nhttps://t.me/ReportPricePeekerBot",
-    "report_button": "Contattalo ora 📬",
+    "report_button": "📬 CONTATTALO ORA",
     "invalid_product": "Non sono riuscito a recuperare il prezzo del prodotto. Assicurati che sia disponibile 🔴",
     "invalid_link": "Il link che hai mandato non è valido. Manda link provenienti solo da Amazon 🛍️\n\nPremi /help per guardare il tutorial 🤦‍♂️",
     "available": "Disponibilità immediata",
     "not_available": "Non disponibile\n<em>Ti invierò una notifica non appena tornerà disponibile</em>",
     "retrieving ": "<em>Sto recuperando il prodotto...</em>",
-    "tracked_product--available":'<strong>🛍️ {name}\n\n💰</strong> Prezzo corrente <strong>{price} €</strong>\n\n🟢<em> Disponibilità immediata\n\n🎯Notifica quando arriva a {alert_price}\n\n🔔 Ultimo prezzo notificato <del>{last_alerted_price}</del></em>\n\n🔗 {url}',
-    "tracked_product--not_available":'<strong>🛍️ {name}\n\n💰</strong> Prezzo corrente {price} €</strong>\n\n🔴 Non disponibile\n\n🔔 Ultimo prezzo notificato <del>{last_alerted_price}</del>\n\n🔗 {url}'
+    "tracked_product--available":'<strong>🛍️ {name}\n\n💰</strong> Prezzo corrente <strong>{price} €</strong>\n\n🟢<em> Disponibilità immediata\n\n🎯Notifica quando arriva a {alert_price}\n\n🔔 Ultimo prezzo notificato {last_alerted_price}</em>\n\n🔗 {url}',
+    "tracked_product--not_available":'<strong>🛍️ {name}</strong>\n\n🔴 Non disponibile\n\n🔔 Ti avviserò io quando tornerà disponibile\n\n🔗 {url}',
+	"tracked_product--used":'Mi dispiace {custom_name}, ma il prodotto che vuoi tracciare è usato. Vuoi tracciare il nuovo?',
+	"yes_button": '✅ Si',
+	"no_button": '💔 No',
+	"change_threshold": '🎯 Inserisci la nuova soglia',
+	"chart": '<em>Sto tracciando il grafico...</em>'
+
 
 
 }

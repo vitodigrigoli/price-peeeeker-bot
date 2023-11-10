@@ -34,47 +34,27 @@ from functools import wraps
 from datetime import datetime
 
 from amazon_utils import extract_amazon_link, get_amazon_product, generate_add_to_cart_link
-from toolbox import generate_alert_price
+from toolbox import generate_alert_price, time_converter, create_chart
 
 from product import Product
 from user import User
 from config import DEV_ID, BOT_TOKEN
 
 
-
-# Decorator that checks the user's language and sets the correct strings in the bot's context
-def language_handler(func):
-	@wraps(func)
-	def wrapper(update, context, *args, **kwargs):
-		user_language = context.user_data.get('language', 'it')  # Use 'it' as the default language
-
-		if user_language == 'it':
-			context.user_data['strings'] = it_strings
-		else:
-			context.user_data['strings'] = en_strings
-		
-		return func(update, context, *args, **kwargs)
-	
-	return wrapper
-
-
 # Function to generate a welcome message at start
-@language_handler
 def start(update, context):
-	strings = context.user_data['strings']
-	custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
+	strings = it_strings
+	custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use first name as the default username
 
 	update.message.reply_text(strings['welcome'].format(custom_name=custom_name), parse_mode='HTML', disable_web_page_preview=True)
 
 	user_ID = str(update.message.from_user.id)
-	user = User(user_ID)
-	user.save()
+	User(user_ID).save()
 
 
 # Function to generate a report message
-@language_handler
 def report(update, context):
-	strings = context.user_data['strings']
+	strings = it_strings
 	custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
 	keyboard = [
@@ -88,9 +68,8 @@ def report(update, context):
 
 
 # Function to generate a coffe message
-@language_handler
 def coffee(update, context):
-	strings = context.user_data['strings']
+	strings = it_strings
 	custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
 	keyboard = [
@@ -103,43 +82,28 @@ def coffee(update, context):
 	update.message.reply_text(strings['coffee'].format(custom_name=custom_name), reply_markup=reply_markup)
 
 
-@language_handler
-# Function that allows you to choose the language
-def set_language(update, context):
-	keyboard = [
-		[InlineKeyboardButton("Italiano 🇮🇹", callback_data='lang:it')],
-		[InlineKeyboardButton("English 🇬🇧", callback_data='lang:en')]
-	]
-	reply_markup = InlineKeyboardMarkup(keyboard)
-
-	strings = context.user_data['strings']
-	update.message.reply_text(strings['choose_language'], reply_markup=reply_markup)
-
 # Function that allows you to choose the username
-@language_handler
 def set_username(update, context):
-	strings = context.user_data['strings']
+	strings = it_strings
 	update.message.reply_text(strings['choose_username'])
 
 	context.user_data['set_username'] = True
 
 
-@language_handler
 # Function that generates a help message
 def help(update, context):
-	strings = context.user_data['strings']
+	strings = it_strings
 	custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
 	commands = "\n".join([f"🔹 /{command} - <em>{description}</em>\n" for command, description in strings["commands"].items()])
 	update.message.reply_text(strings["help"].format(custom_name=custom_name) + commands, parse_mode='HTML', disable_web_page_preview=True)
 
 
-@language_handler
 # Function to send an Amazon affiliate link
 def track (update, context):
 
 	user_ID = str(update.message.from_user.id)
-	strings = context.user_data['strings']
+	strings = it_strings
 	custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
 	# Find URL in message
@@ -151,13 +115,19 @@ def track (update, context):
 		print(url)
 
 		amazon_product = get_amazon_product(url)
-		print(amazon_product)
 
 		if(amazon_product == None):
 			update.message.reply_text('Amazon non fornisce informazioni su questo prodotto'.format(custom_name=custom_name))
 
 		elif(amazon_product == 'Used'):
-			update.message.reply_text('Il prodotto che vuoi tracciare è usato. Vuoi tracciare quello nuovo?'.format(custom_name=custom_name))
+			keyboard = [
+				[
+					InlineKeyboardButton(strings['yes_button'], callback_data=f'track:yes_url'),
+					InlineKeyboardButton(strings['no_button'], callback_data=f'track:no'),
+				],
+			]
+			reply_markup = InlineKeyboardMarkup(keyboard)
+			update.message.reply_text(strings['tracked_product--used'].format(custom_name=custom_name), reply_markup=reply_markup, parse_mode='HTML')
 
 		else:
 			current_date = datetime.now().strftime("%Y-%m-%d")
@@ -185,8 +155,7 @@ def track (update, context):
 			print(product_data)
 			user.add_product(product_data)
 
-			#print_product(update, context, product_ID, product_data)
-			update.message.reply_text(strings['tracking'].format(custom_name=custom_name))
+			print_product(update, context, product, product_data)
 	   
 	else:
 		update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
@@ -240,83 +209,82 @@ def check_price(context):
 	context.bot.send_message(chat_id=DEV_ID, text=dev_text, parse_mode='HTML')
 
 
-# Function that converts time into hours, minutes and seconds
-def time_converter(elapsed_time):
-	hours, remainder = divmod(elapsed_time, 3600)
-	minutes, seconds = divmod(remainder, 60)
-
-	return [hours, minutes, seconds]
-
-
 # Function that prints all the user's tracked products
-@language_handler
 def view_tracked_products(update, context):
 	user_ID = str(update.message.from_user.id)
-	tracked_products = get_tracked_products(user_ID)
 
-	strings = context.user_data['strings']
+	strings = it_strings
 	custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
-	
-	# Se la lista è vuota, invia un messaggio che indica che non ci sono elementi tracciati
-	if tracked_products:
+	user = User.get_user(user_ID)
+	print(user)
+
+	# Check if tracked_products is not empty
+	if user.tracked_products:
 		
-		for product_ID, product_data in tracked_products.items():
+		for product_ID, product_data in user.tracked_products.items():
+
+			product = Product.get_product(product_ID)
 
 			print(f"ID: {product_ID} alert: {product_data.get('alert_price')}")
-			print_product(update, context, product_ID, product_data)
+			print_product(update, context, product, product_data)
 	else:
 		update.message.reply_text(strings['list_empty'].format(custom_name=custom_name))
 	
 
-def print_product(update, context, product_ID, product_data):
+def print_product(update, context, product: Product, product_data):
 
-	user_ID = str(update.message.from_user.id)
-	strings = context.user_data['strings']
+	strings = it_strings
 
 	alert_price = product_data.get('alert_price')
 	last_alerted_price = product_data.get('last_alerted_price')
 
-	product = get_product(product_ID)
+	if product.price != None:
 
-	keyboard = [
-		[
-			InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{user_ID}_{product_ID}'),
-			InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{user_ID}_{product_ID}'),
-		],
-		[
-			InlineKeyboardButton(strings['view_button'], url=product['url']),
-			InlineKeyboardButton(strings['chart_button'], callback_data=f'aaa:{user_ID}_{product_ID}'),
-		],
-		[
-			InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product_ID)),
-		],
-	]
+		keyboard = [
+			[
+				InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
+				InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
+			],
+			[
+				InlineKeyboardButton(strings['view_button'], url=product.url),
+				InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+			],
+			[
+				InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
+			],
+		]
 
-	reply_markup = InlineKeyboardMarkup(keyboard)
-
-	if product['price'] != NOT_AVAILABLE:
 		text = strings['tracked_product--available']
+	
 	else:
+
+		keyboard = [
+			[
+				InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
+				InlineKeyboardButton(strings['view_button'], url=product.url),
+			],
+			[
+				InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+			],
+		]
+
 		text = strings['tracked_product--not_available']
 
-	update.message.reply_text(text.format(name=product['name'], price=product['price'], url=product['url'], alert_price=alert_price, last_alerted_price=last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
+	reply_markup = InlineKeyboardMarkup(keyboard)
+	update.message.reply_text(text.format(name=product.name, price=product.price, url=product.url, alert_price=alert_price, last_alerted_price=last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
 
 
-
-
-@language_handler
 def change_threshold(update, context, user_ID, product_ID):
-	strings = context.user_data['strings']
 
 	context.user_data['set_alert_price'] = True
 	context.user_data['user_ID'] = user_ID
 	context.user_data['product_ID'] = product_ID
 
 
-@language_handler
+
 def input_callback(update, context):
-	strings = context.user_data['strings']
+	strings = it_strings
 	custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
 	if context.user_data.get('set_username'):
@@ -326,74 +294,66 @@ def input_callback(update, context):
 
 	elif context.user_data.get('set_alert_price'):
 
-		user_ID = context.user_data.get('user_ID')
+		user_ID = str(context.user_data.get('user_ID'))
 		product_ID = context.user_data.get('product_ID')
 
 		try:
 			new_alert_price = float(update.message.text)
-			product = get_product(product_ID)
+			product = Product.get_product(product_ID)
+			user = User.get_user(user_ID)
 
-			if( new_alert_price < product['price']):
-				set_alert_price(user_ID, product_ID, new_alert_price)
-				update.message.reply_text('Soglia cambiata con successo')
-				context.user_data['set_alert_price'] = False
-			else:
-				update.message.reply_text(f"Il valore della soglia deve essere minore del prezzo attuale di {product['price']}.")
+			if(product != None):
+				if( new_alert_price < product.price):
+					user.update_price_alert(product_ID, new_alert_price)
+					update.message.reply_text('Soglia cambiata con successo')
+					context.user_data['set_alert_price'] = False
+				else:
+					update.message.reply_text(f"Il valore della soglia deve essere minore del prezzo attuale di {product.price}.")
 
 		except Exception as e:
 			print(f"Error while entering the new price target: {e}")
 			update.message.reply_text('Il valore inserito non è valido. Inserisci un valore numerico.')
 
-		
-
-
-
 	else:
 		update.message.reply_text(strings['default_message'].format(custom_name=custom_name))
 
+
 # Function that manages button callbacks
-@language_handler
 def buttons_callback(update, context):
 	
 	query = update.callback_query
 	query.answer()
 
-	strings = context.user_data['strings']
+	strings = it_strings
 
 	# Analizzare i dati della callback
-	action, value = query.data.split(':')
-	print(f'value: {value} action: {action}')
+	action, product_ID = query.data.split(':')
+	user_ID = query.message.chat_id
+
+	user = User(str(user_ID))
 
 	# Delete the item with ID item_id
 	if action == 'remove':
-
-		user_ID, product_ID = value.split('_')
-		delete_tracked_product(user_ID, product_ID)
+		user.remove_product(product_ID)
 		query.edit_message_text(strings["remove"])
-	
-	# Saves the user's language preference in the context
-	elif action == 'lang':
-		
-		if value ==  'it':
-			context.user_data['language'] = 'it'
-			text = "✅ La lingua è stata impostata correttamente"
-			query.edit_message_text(text=text)
-		else:
-			context.user_data['language'] = 'en'
-			text = "✅ The language has been selected correctly"
-			query.edit_message_text(text=text)
 
 	# Change threshold price of user's product
 	elif action == 'threshold':
-		user_ID, product_ID = value.split('_')
+
 		change_threshold(update, context, user_ID, product_ID)
-		text = "🎯 Inserisci la nuova soglia"
-		context.bot.send_message(chat_id=query.message.chat_id, text=text)
+		text = strings['change_threshold']
+		context.bot.send_message(chat_id=user_ID, text=text)
 
+	elif action == 'chart':
+		text = strings['chart']
+		context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
+		product = Product.get_product(product_ID)
+		graph_path = create_chart(product.history)  # Assumi che 'history_data' sia il tuo dizionario
+		context.bot.send_photo(chat_id=user_ID, photo=open(graph_path, 'rb'))
 
-		
 	else:
 		print("button default behavior")
+
 
 def get_stat(update, context):
 
@@ -412,7 +372,6 @@ def get_stat(update, context):
 	context.bot.send_message(chat_id=DEV_ID, text=dev_text, parse_mode='HTML')
 
 
-
 def main():
 	
 	# Initialization Bot
@@ -426,7 +385,6 @@ def main():
 	dp.add_handler(CommandHandler("start", start))
 	dp.add_handler(CommandHandler('view_tracked', view_tracked_products))
 	dp.add_handler(CommandHandler('help', help))
-	dp.add_handler(CommandHandler('set_language', set_language))
 	dp.add_handler(CommandHandler('set_username', set_username), group=1)
 	dp.add_handler(CommandHandler('coffee', coffee))
 	dp.add_handler(CommandHandler('dev', get_stat))

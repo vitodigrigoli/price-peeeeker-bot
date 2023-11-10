@@ -1,4 +1,4 @@
-from config import db
+from config import db, firestore
 
 # Definition of the User class
 class User:
@@ -63,8 +63,24 @@ class User:
             return None
         
 
-    def add_product(self, product_data):
+    def remove_product(self, product_ID):
         
+        # Reference to the user's document
+        user_ref = db.collection('users').document(self.ID)
+
+        # Construct the key to remove the product from the dictionary
+        product_key = f'tracked_products.{product_ID}'
+
+        # Update to remove the product
+        try:
+            user_ref.update({product_key: firestore.DELETE_FIELD})
+            print(f"Product with ID {product_ID} has been removed from user {self.ID}.")
+        except Exception as e:
+            print(f"Error while removing the product: {e}")
+
+    
+    def add_product(self, product_data):
+    
         # Reference to the user's document
         user = User.get_user(self.ID)
 
@@ -88,7 +104,19 @@ class User:
         except Exception as e:
             print(f"Error while add the tracked product: {e}")
 
+    def update_price_alert(self, product_ID, new_alert_price):
+        # Reference to the user's document
+        user_ref = db.collection('users').document(self.ID)
 
+        # Construct the key to remove the product from the dictionary
+        product_key = f'tracked_products.{product_ID}.alert_price'
+
+        # Update to remove the product
+        try:
+            user_ref.update({product_key: new_alert_price})
+            print(f"The user {self.ID} changed the price target of product {product_ID} to {new_alert_price}.")
+        except Exception as e:
+            print(f"Error while changing the price target: {e}")
 
 
 
