@@ -1,4 +1,5 @@
 from config import db
+from datetime import datetime
 
 
 # Definition of the Product class
@@ -37,10 +38,16 @@ class Product:
                 print(f'The product {self.ID} was successfully added')
 
             else:
+                # update field
+                current_date = datetime.now().strftime('%Y-%m-%d')
+                history_key = f'history.{current_date}'
                 print(f'The product {self.ID} already exists. Update the price to {self.price}')
                 product_ref.update({
                     'price':  self.price,
+                    'merchant': self.merchant,
+                    history_key: self.price
                 })
+
 
 
         except Exception as e:
@@ -69,6 +76,8 @@ class Product:
             return Product.from_dict(product_ID, product_data)
         else:
             return None
+        
+
         
         
 

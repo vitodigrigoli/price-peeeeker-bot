@@ -2,7 +2,7 @@ import requests
 import re
 from config import amazon, AMAZON_ASSOC_TAG
 #from product import Product
-from datetime import datetime
+
 
 # Constant
 NOT_AVAILABLE = 99999
@@ -78,7 +78,6 @@ def get_amazon_product(url, condition='Any'):
     
     if( condition=='New' or product_condition=='New' ):
     
-        product_price = float(product.offers.listings[0].price.amount)
         product_merchant = product.offers.listings[0].merchant_info.name
 
         return {
@@ -110,7 +109,7 @@ def print_amazon_product(url, condition='Used'):
 
 def main():
 
-    url='https://www.amazon.it/dp/B08THKDTTR?tag=price-peeker-21&linkCode=ogi&th=1&psc=1'
+    url='https://www.amazon.it/dp/B08KKJ37F7?tag=price-peeker-21&linkCode=ogi&th=1&psc=1'
     amazon_product = get_amazon_product(url)
     print(amazon_product)
 

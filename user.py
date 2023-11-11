@@ -119,6 +119,24 @@ class User:
             print(f"Error while changing the price target: {e}")
 
 
+    def update_tracked_product(self, product_ID, new_alert_price, new_last_alerted_price):
+        # Reference to the user's document
+        user_ref = db.collection('users').document(self.ID)
+
+        # Aggiorna i campi all'interno del dizionario 'tracked_products'
+        update_data = {
+            f'tracked_products.{product_ID}.alert_price': new_alert_price,
+            f'tracked_products.{product_ID}.last_alerted_price': new_last_alerted_price
+        }
+
+        # Update to remove the product
+        try:
+            user_ref.update(update_data)
+            print(f"The user {self.ID} update tracked product {product_ID} with price alert = {new_alert_price} last_alerted_price = {new_last_alerted_price}.")
+        except Exception as e:
+            print(f"Error while changing tracked product{product_ID} for user {self.IDr}: {e}")
+
+
 
 
 

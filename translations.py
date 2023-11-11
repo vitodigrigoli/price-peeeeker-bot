@@ -1,21 +1,21 @@
 it_strings = {
-    "welcome": "Ciao {custom_name}! Sono il tuo nuovo bot personale 🫡\n\nPosso tracciare un prodotto su Amazon e avvisarti quando si abbasserà di prezzo o tornerà disponibile ⏳\n\n--------------------------------------------------------------\n<strong>COME TRACCIARE UN PRODOTTO 🛍️</strong>\n--------------------------------------------------------------\n\n1️⃣ Vai su <a href='https://www.amazon.it?&tag=price-peeker-21'>Amazon.it</a>\n\n2️⃣ Scegli il prodotto da tracciare\n\n3️⃣ Copia il link o premi sull'icona condividi\n\n4️⃣ Invialo in questa chat\n\n\nPremi /help se hai bisogno di aiuto o guarda il <a href='https://youtube.com/shorts/HlG2XXDhtUI?feature=share'>tutorial</a> 🤦‍♂️",
+    "welcome": "Ciao {custom_name}! Sono il tuo nuovo bot personale 🫡\n\nPosso tracciare un prodotto su Amazon e avvisarti quando si abbasserà di prezzo o tornerà disponibile ⏳\n\n<strong>COME TRACCIARE UN PRODOTTO 🛍️</strong>\n\n1️⃣ Vai su <a href='https://www.amazon.it?&tag=price-peeker-21'>Amazon.it</a>\n\n2️⃣ Scegli il prodotto da tracciare\n\n3️⃣ Copia il link o premi sull'icona condividi\n\n4️⃣ Invialo in questa chat\n\n\nPremi /help se hai bisogno di aiuto o guarda il <a href='https://youtube.com/shorts/HlG2XXDhtUI?feature=share'>tutorial</a> 🤦‍♂️",
     "choose_language": "Per favore seleziona la tua lingua",
     "choose_username": "Come preferisci essere chiamato? 🫣",
     "selected_username": "Ciao {custom_name}! Lieto di conoscerti 🤗",
     "default_message": "Mi dispiace {custom_name}, ma non sono ancora bravo a conversare 🥺\n\nPuoi condividermi un link Amazon da tracciare invece. Beh, almeno quello so farlo bene.\n\nCredo...",
     "tracking": "✅ Sto tracciando il tuo prodotto correttamente.\n\n⏰ Ti avviserò io quando si abbasserà di prezzo o tornerà disponibile.",
-    "help": "Ciao {custom_name}! Hai bisogno di aiuto? 🤭\n\nEccoti un tutorial su come usarmi correttamente: https://youtube.com/shorts/HlG2XXDhtUI?feature=share \n\n--------------------------------------------------------------\n<strong>LISTA DEI COMANDI DISPONIBILI 🫵</strong>\n--------------------------------------------------------------\n\n",
+    "help": "Ciao {custom_name}! Hai bisogno di aiuto? 🤭\n\nEccoti un tutorial su come usarmi correttamente: https://youtube.com/shorts/HlG2XXDhtUI?feature=share \n\n<strong>LISTA DEI COMANDI DISPONIBILI 🫵</strong>",
     "commands": {
         "start": "Inizia a usare il bot",
-        "view_tracked": "Visualizza tutti i prodotti attualmente tracciati",
+        "view_products": "Visualizza tutti i prodotti attualmente tracciati",
         "help": "Come usare il bot correttamente",
         "set_username": "Scegli il nome che userà il bot per chiamarti",
         "report": "Segnala un bug allo sviluppatore",
         "coffee": "Ringrazia lo sviluppatore con un caffè",
         # ... (aggiungi altre descrizioni di comandi qui)
     },
-    "remove": "Rimosso ❌🫡",
+    "remove": "❌🫡 Non traccierò più <em>{product_name}</em>.",
     "remove_button": "❌ Rimuovi",
     "view_button": "👀 Vedi su Amazon",
     "cart_button": "🤩 AGGIUNGI AL CARRELLO AMAZON ORA",
@@ -24,22 +24,26 @@ it_strings = {
     "list_empty": "Mi dispiace {custom_name}, ma non stai tracciando alcun prodotto al momento.\n\nPremi /help se hai bisogno di aiuto 🤦‍♂️",
     "coffee": "Ciao {custom_name}! 😇\n\nVedo che vuoi offrire un caffè al mio sviluppatore ☕️\n\nCon zucchero, grazie ⬇️\nhttps://www.paypal.me/vitodigrigoli",
     "coffee_button": "Offri SENZA ZUCCHERO 😈",
-    "price_dropped": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\nIl prezzo del prodotto è <strong>DIMINUITO</strong>! 🎉💰\n\n🛍️ <strong>{product_name}</strong>\n\n💲Passa da <del>{initial_price}€</del> a <strong>{product_price}€</strong>\n\n🔗 {product_url}",
     "report": "Ciao {custom_name}! Vuoi segnalare un bug o un'idea allo sviluppatore? 👨‍💻\n\nContattalo tramite il nostro bot di supporto:\nhttps://t.me/ReportPricePeekerBot",
     "report_button": "📬 CONTATTALO ORA",
     "invalid_product": "Non sono riuscito a recuperare il prezzo del prodotto. Assicurati che sia disponibile 🔴",
     "invalid_link": "Il link che hai mandato non è valido. Manda link provenienti solo da Amazon 🛍️\n\nPremi /help per guardare il tutorial 🤦‍♂️",
     "available": "Disponibilità immediata",
     "not_available": "Non disponibile\n<em>Ti invierò una notifica non appena tornerà disponibile</em>",
-    "retrieving ": "<em>Sto recuperando il prodotto...</em>",
-    "tracked_product--available":'<strong>🛍️ {name}\n\n💰</strong> Prezzo corrente <strong>{price} €</strong>\n\n🟢<em> Disponibilità immediata\n\n🎯Notifica quando arriva a {alert_price}\n\n🔔 Ultimo prezzo notificato {last_alerted_price}</em>\n\n🔗 {url}',
+    "retrieving ": "⏳ <em>Sto recuperando il prodotto...</em>",
+    "tracked_product--available":'<strong>{name}</strong>\n\n🏷️ Prezzo <strong>{price}€</strong>\n\n🏪 Venduto da {product_merchant}\n\n🎯 Notifica quando arriva a {alert_price}€\n\n🔗 {url}',
     "tracked_product--not_available":'<strong>🛍️ {name}</strong>\n\n🔴 Non disponibile\n\n🔔 Ti avviserò io quando tornerà disponibile\n\n🔗 {url}',
 	"tracked_product--used":'Mi dispiace {custom_name}, ma il prodotto che vuoi tracciare è usato. Vuoi tracciare il nuovo?',
 	"yes_button": '✅ Si',
 	"no_button": '💔 No',
-	"change_threshold": '🎯 Inserisci la nuova soglia',
-	"chart": '<em>Sto tracciando il grafico...</em>'
-
+	"change_threshold": '🎯 Scrivimi la soglia per <em>{product_name}...</em>',
+	"chart": '📊<em>Sto tracciando il grafico di {product_name}...</em>',
+	"broadcast": 'Messaggio Broadcast',
+	"alert--available": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name} è di nuovo <strong>DISPONIBILE</strong>! 🟢</strong>\n\n🏷️ Prezzo <strong>{product_price}€</strong>\n\n🏪 Venduto da {product_merchant}\n\n🔗 {product_url}",
+	"alert--threshold": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Passa da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Venduto da {product_merchant}\n\n🔗 {product_url}",
+    "threshold_success": "La soglia per <em>{product_name}</em> è stata impostata correttamente a <strong>{alert_price}€</strong> ✅",
+	"threshold_high": "🚫 La soglia <strong>deve essere minore</strong> del prezzo di <strong>{product_price}€</strong>. Rimanda un nuovo prezzo da impostare.",
+	"threshold_not_valid": "Valore non valido 🚫 Assicurati di non usare lettere e usa il punto per le cifre decimali.\n\n<em>Esempio: 21.35</em>"
 
 
 }
