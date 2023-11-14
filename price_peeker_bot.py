@@ -194,80 +194,84 @@ def check_price(context):
         for product_ID, product_data in user.tracked_products.items():
 
             product = Product.get_product(product_ID)
-            print(f'Check_price:\n{product}')
 
-            if(product.price != None):
+            if(product):
 
-                if(product_data['alert_price'] == None ):
+                if(product.price != None):
 
-                    print(f'Il prodotto {product.ID} è tornato disponibile per user {user.ID}')
+                    if(product_data['alert_price'] == None ):
 
-                    new_alert_price = generate_alert_price(product.price)
-                    new_last_alerted_price = product.price
-                    user.update_tracked_product(product_ID, new_alert_price, new_last_alerted_price )
+                        print(f'Il prodotto {product.ID} è tornato disponibile per user {user.ID}')
 
-                    keyboard = [
-                        [
-                            InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
-                            InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
-                        ],
-                        [
-                            InlineKeyboardButton(strings['view_button'], url=product.url),
-                            InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
-                        ],
-                        [
-                            InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
-                        ],
-                    ]
+                        new_alert_price = generate_alert_price(product.price)
+                        new_last_alerted_price = product.price
+                        user.update_tracked_product(product_ID, new_alert_price, new_last_alerted_price )
 
-                    text = strings['alert--available']
-                    reply_markup = InlineKeyboardMarkup(keyboard)
+                        keyboard = [
+                            [
+                                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
+                                InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
+                            ],
+                            [
+                                InlineKeyboardButton(strings['view_button'], url=product.url),
+                                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+                            ],
+                            [
+                                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
+                            ],
+                        ]
 
-                    try:
-                        context.bot.send_message(chat_id = user.ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=new_alert_price, last_alerted_price=new_last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
+                        text = strings['alert--available']
+                        reply_markup = InlineKeyboardMarkup(keyboard)
 
-                    except error.Unauthorized:
-                        print(f"User {user.ID} blocked the bot. I'm removing it from the database")
-                        user.delete()
+                        try:
+                            context.bot.send_message(chat_id = user.ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=new_alert_price, last_alerted_price=new_last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
 
-                    except error.TelegramError as e:
-                        print('General error: {e}')
+                        except error.Unauthorized:
+                            print(f"User {user.ID} blocked the bot. I'm removing it from the database")
+                            user.delete()
 
-                elif(product.price <= product_data['alert_price']):
+                        except error.TelegramError as e:
+                            print('General error: {e}')
 
-                    print(f'Il prodotto {product.ID} ha raggiunto la soglia per user {user.ID}')
-                    
-                    new_alert_price = generate_alert_price(product.price)
-                    new_last_alerted_price = product.price
-                    user.update_tracked_product(product_ID, new_alert_price, new_last_alerted_price)
+                    elif(product.price <= product_data['alert_price']):
 
-                    keyboard = [
-                        [
-                            InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
-                            InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
-                        ],
-                        [
-                            InlineKeyboardButton(strings['view_button'], url=product.url),
-                            InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
-                        ],
-                        [
-                            InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
-                        ],
-                    ]
+                        print(f'Il prodotto {product.ID} ha raggiunto la soglia per user {user.ID}')
+                        
+                        new_alert_price = generate_alert_price(product.price)
+                        new_last_alerted_price = product.price
+                        user.update_tracked_product(product_ID, new_alert_price, new_last_alerted_price)
 
-                    text = strings['alert--threshold']
-                    reply_markup = InlineKeyboardMarkup(keyboard)
+                        keyboard = [
+                            [
+                                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
+                                InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
+                            ],
+                            [
+                                InlineKeyboardButton(strings['view_button'], url=product.url),
+                                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+                            ],
+                            [
+                                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
+                            ],
+                        ]
 
-                    try:
-                        context.bot.send_message(chat_id = user.ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=new_alert_price, last_alerted_price=new_last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
+                        text = strings['alert--threshold']
+                        reply_markup = InlineKeyboardMarkup(keyboard)
 
-                    except error.Unauthorized:
-                        print(f"User {user.ID} blocked the bot. I'm removing it from the database")
-                        user.delete()
+                        try:
+                            context.bot.send_message(chat_id = user.ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=new_alert_price, last_alerted_price=new_last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
 
-                    except error.TelegramError as e:
-                        print('General error: {e}')
+                        except error.Unauthorized:
+                            print(f"User {user.ID} blocked the bot. I'm removing it from the database")
+                            user.delete()
 
+                        except error.TelegramError as e:
+                            print('General error: {e}')
+
+            else:
+                print('The product is no longer in the products collection')
+                user.remove_product(product_ID)
             time.sleep(DELAY)
 
         

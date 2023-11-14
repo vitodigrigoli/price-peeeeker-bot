@@ -1,6 +1,7 @@
 import requests
 import re
 from config import amazon, AMAZON_ASSOC_TAG
+import amazon_paapi 
 #from product import Product
 
 
@@ -47,6 +48,10 @@ def get_amazon_product(url, condition='Any'):
 
     try:
         product = amazon.get_items(url, condition)[0]
+
+    except amazon_paapi.errors.exceptions.ItemsNotFound as e:
+        print("ItemsNotFound:", e)
+        return 'Not Found'
 
     except Exception as e:
         print(f"Error while fetching Amazon product: {e}")

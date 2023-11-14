@@ -115,12 +115,23 @@ def update_products():
         
         # update product
         amazon_product = get_amazon_product(data['url'], 'New')
-        new_name = amazon_product['name']
-        new_price =	amazon_product['price']
-        new_merchant = amazon_product['merchant']
-        product = Product(doc.id, new_name, data['url'], new_price, new_merchant, data['history'])
 
-        product.save()
+        if(amazon_product == 'Not Found'):
+            product = Product.get_product(doc.id)
+            product.delete()
+
+        elif(amazon_product):
+
+            new_name = amazon_product['name']
+            new_price =	amazon_product['price']
+            new_merchant = amazon_product['merchant']
+            product = Product(doc.id, new_name, data['url'], new_price, new_merchant, data['history'])
+
+            product.save()
+        
+        else:
+            product = Product.get_product(doc.id)
+            product.delete()
         
 
 

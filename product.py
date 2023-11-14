@@ -78,6 +78,17 @@ class Product:
             return None
         
 
+    def delete(self):
+        product_ref = db.collection('products').document(self.ID)
+        doc = product_ref.get()
+
+        if doc.exists:
+            product_ref.delete()
+            print(f'The product {self.ID} was successfully removed')
+        else:
+            print(f'The product {self.ID} was not found')
+        
+
         
         
 
