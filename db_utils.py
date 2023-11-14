@@ -121,12 +121,6 @@ def update_products():
         product = Product(doc.id, new_name, data['url'], new_price, new_merchant, data['history'])
 
         product.save()
-
-        if(data['price'] == None and product.price != None):
-            print(f'Il prodotto {product.ID} è tornato disponibile')
-
-        elif(product.price < data['price']):
-            print(f'Il prodotto {product.ID} si è abbassato di prezzo')
         
 
 

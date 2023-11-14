@@ -104,6 +104,7 @@ class User:
         except Exception as e:
             print(f"Error while add the tracked product: {e}")
 
+
     def update_price_alert(self, product_ID, new_alert_price):
         # Reference to the user's document
         user_ref = db.collection('users').document(self.ID)
@@ -137,17 +138,27 @@ class User:
             print(f"Error while changing tracked product{product_ID} for user {self.IDr}: {e}")
 
 
+    # Function that removes a product from the users collection
+    def delete(self):
+
+        user_ref = db.collection('users').document(self.ID)
+        doc = user_ref.get()
+
+        if doc.exists:
+            user_ref.delete()
+            print(f'The user {self.ID} was successfully removed')
+        else:
+            print(f'The user {self.ID} was not found')
 
 
 
 
 def main():
 
-    print('main')
     user = User('12345', True, 'it', {'BCM000000':{'alert_price': 25, 'last_alerted_price': 28.58}})
     user.save()
 
-    user_2 = User('123458', True, 'it', {'BCM000000':{'alert_price': 25, 'last_alerted_price': 28.58}})
+    user_2 = User('123558', True, 'it', {'BCM000000':{'alert_price': 25, 'last_alerted_price': 28.58}})
     
     product_data = {
         'ID': 'B456789',
@@ -155,7 +166,9 @@ def main():
         'last_alerted_price': 62
     }
 
-    user_2.add_product(product_data)
+
+
+    user_2.delete()
 
 
 
