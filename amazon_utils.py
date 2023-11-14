@@ -80,28 +80,25 @@ def get_amazon_product(url, condition='Any'):
     
 
     product_condition = product.offers.listings[0].condition.value
-    
-    if( condition=='New' or product_condition=='New' ):
-    
-        product_merchant = product.offers.listings[0].merchant_info.name
+    product_merchant = product.offers.listings[0].merchant_info.name
 
-        return {
-            'ID': product_ID,
-            'name': product_name,
-            'url': product_url,
-            'price': product_price,
-            'merchant': product_merchant
-        }
+    amazon_product = {
+        'ID': product_ID,
+        'name': product_name,
+        'url': product_url,
+        'price': product_price,
+        'merchant': product_merchant,
+        'condition': product_condition
+    }
 
-    else:
-        return 'Used'
+    return amazon_product
+
 
 
 # Function to get Amazon product info
 def print_amazon_product(url, condition='Used'):
     
     products = amazon.get_items(url, condition)
-
 
     for product in products:
         for listing in product.offers.listings:
@@ -114,8 +111,8 @@ def print_amazon_product(url, condition='Used'):
 
 def main():
 
-    url='https://www.amazon.it/dp/B08KKJ37F7?tag=price-peeker-21&linkCode=ogi&th=1&psc=1'
-    amazon_product = get_amazon_product(url)
+    url='https://www.amazon.it/dp/B0BDKJ4WWC?tag=price-peeker-21&linkCode=ogi&th=1&psc=1'
+    amazon_product = get_amazon_product('B0BDKJ4WWC', 'New')
     print(amazon_product)
 
     

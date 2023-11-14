@@ -39,6 +39,12 @@ def create_chart(history, limit=90):
     # Ordina il DataFrame per data
     df = df.sort_values('Date')
 
+    df.dropna(inplace=True)
+
+    if len(df) == 0:
+        return None
+
+
     # Calcola il prezzo massimo, minimo e medio
     max_price = df['Price'].max()
     min_price = df['Price'].min()
@@ -121,8 +127,14 @@ def generate_price_history(initial_price, days=90):
 
 
 def disable_auto_link(url):
-    # Sostituisce il punto con un punto e uno spazio, per evitare che Telegram lo riconosca come un URL
-    return url.replace('.', '_')
+
+    if(url):
+        # Sostituisce il punto con un punto e uno spazio, per evitare che Telegram lo riconosca come un URL
+        return url.replace('.', '_')
+
+
+
+
 
 
 def main():

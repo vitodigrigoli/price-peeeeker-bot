@@ -103,75 +103,6 @@ def help(update, context):
     update.message.reply_text(strings["help"].format(custom_name=custom_name) + commands, parse_mode='HTML', disable_web_page_preview=True)
 
 
-# Function to send an Amazon affiliate link
-def track (update, context):
-
-    context.user_data['set_username'] = False
-    context.user_data['set_alert_price'] = False
-
-    user_ID = str(update.message.from_user.id)
-    strings = it_strings
-    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
-
-    # Find URL in message
-    message = update.message.text
-    url = extract_amazon_link(message)
-
-    if url:
-        update.message.reply_text(strings['retrieving'].format(custom_name=custom_name), parse_mode='HTML')
-        print(url)
-
-        amazon_product = get_amazon_product(url)
-
-        if(amazon_product == None):
-            update.message.reply_text('Amazon non fornisce informazioni su questo prodotto'.format(custom_name=custom_name))
-
-        elif(amazon_product == 'Used'):
-            keyboard = [
-                [
-                    InlineKeyboardButton(strings['yes_button'], callback_data=f'track:yes_url'),
-                    InlineKeyboardButton(strings['no_button'], callback_data=f'track:no'),
-                ],
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            update.message.reply_text(strings['tracked_product--used'].format(custom_name=custom_name), reply_markup=reply_markup, parse_mode='HTML')
-
-        else:
-            product_ID = amazon_product.get('ID')
-            product_name =	amazon_product.get('name')
-            product_url =	amazon_product.get('url')
-            product_price =	amazon_product.get('price')
-            product_merchant =	amazon_product.get('merchant')
-            product_history = generate_price_history(product_price)
-
-            product = Product(
-                ID = product_ID,
-                name = product_name,
-                url = product_url,
-                price = product_price,
-                merchant = product_merchant,
-                history = product_history
-            )
-
-            product.save()
-
-            user = User(user_ID)
-
-            alert_price = generate_alert_price(product.price)
-            product_data = {
-                'ID': product.ID,
-                'alert_price': alert_price,
-                'last_alerted_price': product.price
-            }
-
-            print(product_data)
-            user.add_product(product_data)
-
-            print_product(update, context, product, product_data)
-       
-    else:
-        update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
-
 
 # Function that checks whether the price has dropped
 def check_price(context):
@@ -272,6 +203,7 @@ def check_price(context):
             else:
                 print('The product is no longer in the products collection')
                 user.remove_product(product_ID)
+            
             time.sleep(DELAY)
 
         
@@ -349,7 +281,7 @@ def print_product(update, context, product: Product, product_data):
         text = strings['tracked_product--not_available']
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text(text.format(name=product.name, price=product.price, url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=alert_price, last_alerted_price=last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
+    update.message.reply_text(text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=alert_price, last_alerted_price=last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
 
 
 def change_threshold(update, context, user_ID, product_ID):
@@ -396,6 +328,90 @@ def input_callback(update, context):
         update.message.reply_text(strings['default_message'].format(custom_name=custom_name))
 
 
+
+# Function to send an Amazon affiliate link
+def track (update, context):
+
+    context.user_data['set_username'] = False
+    context.user_data['set_alert_price'] = False
+
+    user_ID = str(update.message.from_user.id)
+    strings = it_strings
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
+
+    # Find URL in message
+    message = update.message.text
+    url = extract_amazon_link(message)
+
+    if url:
+        update.message.reply_text(strings['retrieving'].format(custom_name=custom_name), parse_mode='HTML')
+
+        amazon_product = get_amazon_product(url)
+
+        if(amazon_product == None or amazon_product == 'Not Found'):
+            update.message.reply_text('Amazon non fornisce informazioni su questo prodotto'.format(custom_name=custom_name))
+
+        elif(amazon_product['condition'] == 'Used'):
+            product_ID = amazon_product['ID']
+            keyboard = [
+                [
+                    InlineKeyboardButton(strings['yes_button'], callback_data=f'track:{product_ID}'),
+                ],
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            update.message.reply_text(strings['tracked_product--used'].format(custom_name=custom_name), reply_markup=reply_markup, parse_mode='HTML')
+
+        else:
+            add_product(amazon_product, user_ID)
+
+            product_ID = amazon_product.get('ID')
+            product = Product.get_product(product_ID)
+            product_data = User.get_user(user_ID).get_product(product_ID)
+
+            print_product(update, context, product, product_data)
+            
+       
+    else:
+        update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
+
+
+def add_product(amazon_product, user_ID):
+
+    product_ID = amazon_product.get('ID')
+    product_name = amazon_product.get('name')
+    product_url = amazon_product.get('url')
+    product_price =	amazon_product.get('price')
+    product_merchant = amazon_product.get('merchant')
+    product_history = generate_price_history(product_price)
+
+    product = Product(
+        ID = product_ID,
+        name = product_name,
+        url = product_url,
+        price = product_price,
+        merchant = product_merchant,
+        history = product_history
+    )
+
+    product.save()
+
+    user = User.get_user(user_ID)
+
+    alert_price = generate_alert_price(product.price)
+    product_data = {
+        'ID': product.ID,
+        'alert_price': alert_price,
+        'last_alerted_price': product.price
+    }
+
+    user.add_product(product_data)
+
+    return product, product_data
+
+
+
+
 # Function that manages button callbacks
 def buttons_callback(update, context):
     
@@ -406,37 +422,107 @@ def buttons_callback(update, context):
 
     # Analizzare i dati della callback
     action, product_ID = query.data.split(':')
-    user_ID = query.message.chat_id
+    user_ID = str(query.message.chat_id)
 
-    user = User(str(user_ID))
-    product = Product.get_product(product_ID)
+    user = User(user_ID)
+    
 
     # Delete the item with ID item_id
     if action == 'remove':
+        product = Product.get_product(product_ID)
         user.remove_product(product_ID)
         query.edit_message_text(strings["remove"].format(product_name=product.name), parse_mode='HTML')
 
     # Change threshold price of user's product
     elif action == 'threshold':
+        product = Product.get_product(product_ID)
         change_threshold(update, context, user_ID, product_ID)
         text = strings['change_threshold'].format(product_name=product.name)
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
     elif action == 'chart':
+        product = Product.get_product(product_ID)
         text = strings['chart'].format(product_name=product.name)
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
         # Crea il grafico e ottieni il buffer
         buf = create_chart(product.history)
-        
-        # Invia il grafico come foto
-        context.bot.send_photo(chat_id=user_ID, photo=buf)
 
-        # Chiudi il buffer
-        buf.close()
+        if buf:
+            # Invia il grafico come foto
+            context.bot.send_photo(chat_id=user_ID, photo=buf)
+            # Chiudi il buffer
+            buf.close()
+        else:
+            text = "Non ci sono dati disponibili negli ultimi 90 giorni"
+            context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
+
+
+        
+
+    elif action == 'track':
+        context.bot.send_message(chat_id=user_ID, text=strings['retrieving'], parse_mode='HTML')
+        amazon_product = get_amazon_product(product_ID, 'New')
+        if( amazon_product != None and amazon_product != 'Not Found'):
+            product, product_data = add_product(amazon_product, user.ID)
+
+            send_product(context, user_ID, product, product_data)
+
+
 
     else:
         print("button default behavior")
+
+
+
+def send_product( context, user_ID, product: Product, product_data):
+
+    strings = it_strings
+
+    alert_price = product_data.get('alert_price')
+    last_alerted_price = product_data.get('last_alerted_price')
+
+    if product.price != None:
+
+        keyboard = [
+            [
+                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
+                InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
+            ],
+            [
+                InlineKeyboardButton(strings['view_button'], url=product.url),
+                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+            ],
+            [
+                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
+            ],
+        ]
+
+        text = strings['tracked_product--available']
+    
+    else:
+
+        keyboard = [
+            [
+                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
+                InlineKeyboardButton(strings['view_button'], url=product.url),
+            ],
+            [
+                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+            ],
+        ]
+
+        text = strings['tracked_product--not_available']
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    try:
+        context.bot.send_message(chat_id = user_ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=alert_price, last_alerted_price=last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
+
+    except error.TelegramError as e:
+        print('General error: {e}')
+
+
 
 
 def get_stat(update, context):
@@ -500,7 +586,7 @@ def main():
 
 
     # Add a job to check the price every 6 hours
-    job_queue.run_repeating(check_price, interval=30)
+    #job_queue.run_repeating(check_price, interval=30)
     
     updater.start_polling()
     updater.idle()

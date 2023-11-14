@@ -151,24 +151,33 @@ class User:
             print(f'The user {self.ID} was not found')
 
 
+    def get_product(self, product_ID):
+        user_ref = db.collection('users').document(self.ID)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            tracked_product = user_data['tracked_products'][product_ID]
+
+            product_data = {
+                'ID': product_ID,
+                'alert_price': tracked_product['alert_price'],
+                'last_alerted_price': tracked_product['last_alerted_price']
+            }
+
+            return product_data
+
+        else:
+            return None
+        
+
 
 
 def main():
 
-    user = User('12345', True, 'it', {'BCM000000':{'alert_price': 25, 'last_alerted_price': 28.58}})
-    user.save()
+    user = User.get_user('37104959')
 
-    user_2 = User('123558', True, 'it', {'BCM000000':{'alert_price': 25, 'last_alerted_price': 28.58}})
-    
-    product_data = {
-        'ID': 'B456789',
-        'alert_price': 62,
-        'last_alerted_price': 62
-    }
-
-
-
-    user_2.delete()
+    user.get_product('B0C14SXDGR')
 
 
 
