@@ -39,23 +39,38 @@ from product import Product
 from user import User
 from config import DEV_ID, BOT_TOKEN, db, MAX_TRACKED_PRODUCTS_LIMIT, DELAY
 
+from bot_responses import responses
+
 
 
 
 # Function to generate a welcome message at start
 def start(update, context):
-    strings = it_strings
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+
+    strings = responses[user.language_preference][user.personality_mode]
+
     custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use first name as the default username
 
     update.message.reply_text(strings['welcome'].format(custom_name=custom_name), parse_mode='HTML', disable_web_page_preview=True)
 
-    user_ID = str(update.message.from_user.id)
-    User(user_ID).save()
+    
 
 
 # Function to generate a report message
 def report(update, context):
-    strings = it_strings
+
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
+
     custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     keyboard = [
@@ -70,7 +85,13 @@ def report(update, context):
 
 # Function to generate a coffe message
 def coffee(update, context):
-    strings = it_strings
+
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
     custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     keyboard = [
@@ -85,7 +106,14 @@ def coffee(update, context):
 
 # Function that allows you to choose the username
 def set_username(update, context):
-    strings = it_strings
+
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
+
     update.message.reply_text(strings['choose_username'])
 
     context.user_data['set_username'] = True
@@ -94,7 +122,14 @@ def set_username(update, context):
 
 # Function that generates a help message
 def help(update, context):
-    strings = it_strings
+
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
+
     custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     commands = "\n".join([f"🔹 /{command} - <em>{description}</em>\n" for command, description in strings["commands"].items()])
@@ -102,7 +137,7 @@ def help(update, context):
 
 
 
-# Function that checks whether the price has dropped
+# Function that checks whether the price has dropped ---TO FIXED!!!!!!!!!!!!
 def check_price(context):
 
     strings = it_strings
@@ -218,13 +253,15 @@ def check_price(context):
 
 # Function that prints all the user's tracked products
 def view_tracked_products(update, context):
+
     user_ID = str(update.message.from_user.id)
-
-    strings = it_strings
-    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
-
     user = User.get_user(user_ID)
-    print(user)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
+
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     # Check if tracked_products is not empty
     if user.tracked_products:
@@ -241,7 +278,12 @@ def view_tracked_products(update, context):
 
 def print_product(update, context, product: Product, product_data):
 
-    strings = it_strings
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
 
     alert_price = product_data.get('alert_price')
     last_alerted_price = product_data.get('last_alerted_price')
@@ -292,7 +334,14 @@ def change_threshold(update, context, user_ID, product_ID):
 
 
 def input_callback(update, context):
-    strings = it_strings
+
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
+
     custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     if context.user_data.get('set_username'):
@@ -334,14 +383,16 @@ def track (update, context):
     context.user_data['set_alert_price'] = False
 
     user_ID = str(update.message.from_user.id)
-    strings = it_strings
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
     custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
 
     # Find URL in message
     message = update.message.text
     url = extract_amazon_link(message)
-
-    user = User.get_user(user_ID)
 
     if user.count_tracked_products() >= MAX_TRACKED_PRODUCTS_LIMIT and user.is_premium == False:
         update.message.reply_text(strings['track_limit'].format(custom_name=custom_name, limit=MAX_TRACKED_PRODUCTS_LIMIT))
@@ -420,29 +471,34 @@ def buttons_callback(update, context):
     query = update.callback_query
     query.answer()
 
-    strings = it_strings
+    user_ID = str(query.message.chat_id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
 
     # Analizzare i dati della callback
-    action, product_ID = query.data.split(':')
-    user_ID = str(query.message.chat_id)
-
-    user = User(user_ID)
+    action, value = query.data.split(':')
     
 
     # Delete the item with ID item_id
     if action == 'remove':
+        product_ID = value
         product = Product.get_product(product_ID)
         user.remove_product(product_ID)
         query.edit_message_text(strings["remove"].format(product_name=product.name), parse_mode='HTML')
 
     # Change threshold price of user's product
     elif action == 'threshold':
+        product_ID = value
         product = Product.get_product(product_ID)
         change_threshold(update, context, user_ID, product_ID)
         text = strings['change_threshold'].format(product_name=product.name)
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
     elif action == 'chart':
+        product_ID = value
         product = Product.get_product(product_ID)
         text = strings['chart'].format(product_name=product.name)
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
@@ -460,6 +516,7 @@ def buttons_callback(update, context):
             context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
     elif action == 'track':
+        product_ID = value
         context.bot.send_message(chat_id=user_ID, text=strings['retrieving'], parse_mode='HTML')
         amazon_product = get_amazon_product(product_ID, 'New')
         if( amazon_product != None and amazon_product != 'Not Found'):
@@ -471,6 +528,17 @@ def buttons_callback(update, context):
         text = strings['premium_activate'].format(user_ID=user_ID)
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
+    elif action == 'personality':
+        personality_mode = value
+        user.update_personality_mode(personality_mode)
+
+        user = User.get_user(user_ID)
+        strings = responses[user.language_preference][user.personality_mode]
+
+        text = strings['personality_changed']
+        context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
+
+
     else:
         print("button default behavior")
 
@@ -478,7 +546,11 @@ def buttons_callback(update, context):
 
 def send_product( context, user_ID, product: Product, product_data):
 
-    strings = it_strings
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
 
     alert_price = product_data.get('alert_price')
     last_alerted_price = product_data.get('last_alerted_price')
@@ -543,15 +615,16 @@ def get_stat(update, context):
 
 
 def broadcast_message(update, context):
-    
-    print()
-    strings = it_strings
+
     users = db.collection('users').stream()
 
-    for user in users:
+    for doc in users:
+
+        user = User.get_user(doc.id)
+        strings = responses[user.language_preference][user.personality_mode]
 
         try:
-            context.bot.send_message(chat_id=user.id, text=strings['broadcast'], parse_mode='HTML')
+            context.bot.send_message(chat_id=user.ID, text=strings['broadcast'], parse_mode='HTML')
             time.sleep(DELAY)
         
         except error.Unauthorized:
@@ -565,10 +638,13 @@ def broadcast_message(update, context):
 
 # Function to generate a welcome message at start
 def premium(update, context):
-    strings = it_strings
-    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use first name as the default username
-
     user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use first name as the default username
 
     keyboard = [
             [
@@ -580,7 +656,42 @@ def premium(update, context):
     update.message.reply_text(strings['premium'].format(custom_name=custom_name, user_ID=user_ID, limit=MAX_TRACKED_PRODUCTS_LIMIT ), reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True)
 
 
+def set_personality(update, context):
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+
+    strings = responses[user.language_preference][user.personality_mode]
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use empty string as the default username
+
+
+
+    keyboard = [
+            [
+                InlineKeyboardButton(strings['robot_friendly'], callback_data=f'personality:default'),
+            ],
+            [
+                InlineKeyboardButton(strings['robot_devil'], callback_data=f'personality:robot_devil'),
+            ],
+            [
+                InlineKeyboardButton(strings['merchant_viking'], callback_data=f'personality:merchant_viking'),
+            ],
+        ]
     
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    update.message.reply_text(strings['choose_personality'], reply_markup=reply_markup)
+
+
+
+
+
+
+
+
+
 
 def main():
 
@@ -600,6 +711,7 @@ def main():
     dp.add_handler(CommandHandler('dev', get_stat))
     dp.add_handler(CommandHandler('report', report))
     dp.add_handler(CommandHandler('premium', premium))
+    dp.add_handler(CommandHandler('set_personality', set_personality))
     dp.add_handler(MessageHandler(Filters.text & Filters.entity("url"), track), group=0)
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.entity("url"), input_callback))
     dp.add_handler(CallbackQueryHandler(buttons_callback))

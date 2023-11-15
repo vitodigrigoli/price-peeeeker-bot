@@ -3,17 +3,18 @@ from config import db, firestore
 # Definition of the User class
 class User:
 
-    def __init__(self, ID, is_premium = False, language_preference='it', tracked_products={} ):
+    def __init__(self, ID, premium_status = {'is_premium':False, 'type': None, 'expiry_date': None}, language_preference='it', personality_mode='default', tracked_products={} ):
 
         self.ID = ID
-        self.is_premium = is_premium
-        self.tracked_products = tracked_products
+        self.premium_status = premium_status
         self.language_preference = language_preference
+        self.personality_mode = personality_mode
+        self.tracked_products = tracked_products
 
 
     def __repr__(self):
 
-        return f"User( ID = '{self.ID}', is_premium = {self.is_premium}, language_preference = {self.language_preference} tracked_products = {self.tracked_products} )"
+        return f"User( ID = '{self.ID}', premium_status = {self.premium_status}, language_preference = {self.language_preference}, personality_mode = {self.personality_mode}, tracked_products = {self.tracked_products} )"
     
 
     def save(self):
@@ -25,8 +26,9 @@ class User:
             if not user_doc.exists:
 
                 user_data = {
-                    'is_premium': self.is_premium,
+                    'premium_status': self.premium_status,
                     'language_preference': self.language_preference,
+                    'personality_mode': self.personality_mode,
                     'tracked_products': self.tracked_products
                 }
 
@@ -43,11 +45,12 @@ class User:
     @classmethod
     def from_dict(cls, user_ID, user_data):
 
-        is_premium = user_data.get('is_premium')
+        premium_status = user_data.get('premium_status')
         language_preference = user_data.get('language_preference')
+        personality_mode = user_data.get('personality_mode')
         tracked_products = user_data.get('tracked_products')
 
-        return cls(user_ID, is_premium, language_preference, tracked_products )
+        return cls(user_ID, premium_status, language_preference, personality_mode, tracked_products )
 
 
     @staticmethod
@@ -174,13 +177,48 @@ class User:
     def count_tracked_products(self):
         return len(self.tracked_products)
 
+   
+    def update_premium_status(self, is_premium, type=None, expiry_date=None):
+        # Reference to the user's document
+        user_ref = db.collection('users').document(self.ID)
+
+        # Aggiorna i campi all'interno del dizionario 'tracked_products'
+        update_data = {
+            f'premium_status.is_premium': is_premium,
+            f'premium_status.type': type,
+            f'premium_status.expiry_date': expiry_date
+        }
+
+        # Update to remove the product
+        try:
+            user_ref.update(update_data)
+            print(f"The user {self.ID} update premium_status with is_premium = {is_premium} type = {type} expiry_date = {expiry_date}")
+        except Exception as e:
+            print(f"Error while updating premium_status for user {self.ID}: {e}")
+
+
+    def update_personality_mode(self, personality_mode):
+        # Reference to the user's document
+        user_ref = db.collection('users').document(self.ID)
+
+        # Aggiorna i campi all'interno del dizionario 'tracked_products'
+        update_data = {
+            f'personality_mode': personality_mode,
+        }
+
+        # Update to remove the product
+        try:
+            user_ref.update(update_data)
+            print(f"The user {self.ID} update personality_mode with {personality_mode}")
+        except Exception as e:
+            print(f"Error while updating personality_mode for user {self.ID}: {e}")
 
 
 def main():
 
     user = User.get_user('37104959')
 
-    print(user.count_tracked_products())
+    user.update_premium_status(True, 'annual')
 
 
 
