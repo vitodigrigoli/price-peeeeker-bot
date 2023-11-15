@@ -22,3 +22,7 @@ db = firestore.client()
 # Create an Amazon instance
 amazon = AmazonApi(AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOC_TAG, AMAZON_COUNTRY, throttling=10)
 
+# Constant
+MAX_TRACKED_PRODUCTS_LIMIT = 3
+DELAY = 0.5
+

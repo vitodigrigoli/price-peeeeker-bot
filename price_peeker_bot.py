@@ -24,14 +24,12 @@ version - Visualizza le novità della nuova versione
 
 
 # Libraries
-from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, error
-from telegram.ext import CommandHandler, CallbackContext, Updater, Filters, MessageHandler, CallbackQueryHandler, ConversationHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, error
+from telegram.ext import CommandHandler, Updater, Filters, MessageHandler, CallbackQueryHandler
 
 
 import time
-from translations import it_strings, en_strings
-from functools import wraps
-from datetime import datetime
+from translations import it_strings
 
 from db_utils import update_products
 from amazon_utils import extract_amazon_link, get_amazon_product, generate_add_to_cart_link
@@ -39,9 +37,9 @@ from toolbox import generate_alert_price, time_converter, create_chart, generate
 
 from product import Product
 from user import User
-from config import DEV_ID, BOT_TOKEN, db
+from config import DEV_ID, BOT_TOKEN, db, MAX_TRACKED_PRODUCTS_LIMIT, DELAY
 
-DELAY = 0.5
+
 
 
 # Function to generate a welcome message at start
@@ -343,40 +341,46 @@ def track (update, context):
     message = update.message.text
     url = extract_amazon_link(message)
 
-    if url:
-        update.message.reply_text(strings['retrieving'].format(custom_name=custom_name), parse_mode='HTML')
+    user = User.get_user(user_ID)
 
-        amazon_product = get_amazon_product(url)
-
-        if(amazon_product == None or amazon_product == 'Not Found'):
-            update.message.reply_text('Amazon non fornisce informazioni su questo prodotto'.format(custom_name=custom_name))
-
-        elif(amazon_product['condition'] == 'Used'):
-            product_ID = amazon_product['ID']
-            keyboard = [
-                [
-                    InlineKeyboardButton(strings['yes_button'], callback_data=f'track:{product_ID}'),
-                ],
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-            update.message.reply_text(strings['tracked_product--used'].format(custom_name=custom_name), reply_markup=reply_markup, parse_mode='HTML')
-
-        else:
-            add_product(amazon_product, user_ID)
-
-            product_ID = amazon_product.get('ID')
-            product = Product.get_product(product_ID)
-            product_data = User.get_user(user_ID).get_product(product_ID)
-
-            print_product(update, context, product, product_data)
-            
-       
+    if user.count_tracked_products() >= MAX_TRACKED_PRODUCTS_LIMIT and user.is_premium == False:
+        update.message.reply_text(strings['track_limit'].format(custom_name=custom_name, limit=MAX_TRACKED_PRODUCTS_LIMIT))
+    
     else:
-        update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
+
+        if url:
+            update.message.reply_text(strings['retrieving'].format(custom_name=custom_name), parse_mode='HTML')
+
+            amazon_product = get_amazon_product(url)
+
+            if(amazon_product == None or amazon_product == 'Not Found'):
+                update.message.reply_text(strings['product_not_found'].format(custom_name=custom_name))
+
+            elif(amazon_product['condition'] == 'Used'):
+                product_ID = amazon_product['ID']
+                keyboard = [
+                    [
+                        InlineKeyboardButton(strings['yes_button'], callback_data=f'track:{product_ID}'),
+                    ],
+                ]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+
+                update.message.reply_text(strings['tracked_product--used'].format(custom_name=custom_name), reply_markup=reply_markup, parse_mode='HTML')
+
+            else:
+                add_product(amazon_product, user)
+
+                product_ID = amazon_product.get('ID')
+                product = Product.get_product(product_ID)
+                product_data = User.get_user(user_ID).get_product(product_ID)
+
+                print_product(update, context, product, product_data)      
+        
+        else:
+            update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
 
 
-def add_product(amazon_product, user_ID):
+def add_product(amazon_product, user: User):
 
     product_ID = amazon_product.get('ID')
     product_name = amazon_product.get('name')
@@ -395,8 +399,6 @@ def add_product(amazon_product, user_ID):
     )
 
     product.save()
-
-    user = User.get_user(user_ID)
 
     alert_price = generate_alert_price(product.price)
     product_data = {
@@ -454,11 +456,8 @@ def buttons_callback(update, context):
             # Chiudi il buffer
             buf.close()
         else:
-            text = "Non ci sono dati disponibili negli ultimi 90 giorni"
+            text = strings['chart_not_available']
             context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
-
-
-        
 
     elif action == 'track':
         context.bot.send_message(chat_id=user_ID, text=strings['retrieving'], parse_mode='HTML')
@@ -468,7 +467,9 @@ def buttons_callback(update, context):
 
             send_product(context, user_ID, product, product_data)
 
-
+    elif action == 'premium':
+        text = strings['premium_activate'].format(user_ID=user_ID)
+        context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
     else:
         print("button default behavior")
@@ -524,7 +525,6 @@ def send_product( context, user_ID, product: Product, product_data):
 
 
 
-
 def get_stat(update, context):
 
     docs = db.collection('user_data').stream()
@@ -554,11 +554,33 @@ def broadcast_message(update, context):
             context.bot.send_message(chat_id=user.id, text=strings['broadcast'], parse_mode='HTML')
             time.sleep(DELAY)
         
-        except Exception as e:
-            print(f"Errore nell'invio del messaggio per user {user.id}: {e}")
+        except error.Unauthorized:
+            print(f"User {user.ID} blocked the bot. I'm removing it from the database")
+            user.delete()
+
+        except error.TelegramError as e:
+            print('General error: {e}')
     
     
 
+# Function to generate a welcome message at start
+def premium(update, context):
+    strings = it_strings
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use first name as the default username
+
+    user_ID = str(update.message.from_user.id)
+
+    keyboard = [
+            [
+                InlineKeyboardButton(strings['premium_button'], callback_data=f'premium:'),
+            ],
+        ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text(strings['premium'].format(custom_name=custom_name, user_ID=user_ID, limit=MAX_TRACKED_PRODUCTS_LIMIT ), reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True)
+
+
+    
 
 def main():
 
@@ -577,6 +599,7 @@ def main():
     dp.add_handler(CommandHandler('coffee', coffee))
     dp.add_handler(CommandHandler('dev', get_stat))
     dp.add_handler(CommandHandler('report', report))
+    dp.add_handler(CommandHandler('premium', premium))
     dp.add_handler(MessageHandler(Filters.text & Filters.entity("url"), track), group=0)
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.entity("url"), input_callback))
     dp.add_handler(CallbackQueryHandler(buttons_callback))

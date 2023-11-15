@@ -170,6 +170,9 @@ class User:
         else:
             return None
         
+    
+    def count_tracked_products(self):
+        return len(self.tracked_products)
 
 
 
@@ -177,7 +180,9 @@ def main():
 
     user = User.get_user('37104959')
 
-    user.get_product('B0C14SXDGR')
+    print(user.count_tracked_products())
+
+
 
 
 
