@@ -148,7 +148,7 @@ def help(update, context):
 
 
 
-# Function that checks whether the price has dropped ---TO FIXED!!!!!!!!!!!!
+# Function that checks whether the price has dropped
 def check_price(context):
 
     strings = it_strings
@@ -164,7 +164,7 @@ def check_price(context):
     for doc in docs:
         count += 1
         user_data = doc.to_dict()
-        user = User(doc.id, user_data['is_premium'], user_data['language_preference'], user_data['tracked_products'])
+        user = User(doc.id, user_data['premium_status'], user_data['language_preference'], user_data['personality_mode'], user_data['tracked_products'])
         
         for product_ID, product_data in user.tracked_products.items():
 
@@ -235,7 +235,7 @@ def check_price(context):
                         reply_markup = InlineKeyboardMarkup(keyboard)
 
                         try:
-                            context.bot.send_message(chat_id = user.ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=new_alert_price, last_alerted_price=new_last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
+                            context.bot.send_message(chat_id = user.ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=new_alert_price, last_alerted_price=product_data['last_alerted_price']), reply_markup=reply_markup, parse_mode='HTML')
 
                         except error.Unauthorized:
                             print(f"User {user.ID} blocked the bot. I'm removing it from the database")
@@ -558,6 +558,8 @@ def buttons_callback(update, context):
             text = strings['personality_not_changed']
         else:
             user.update_personality_mode(personality_mode)
+            user = User.get_user(user_ID)
+            strings = responses[user.language_preference][user.personality_mode]
             text = strings['personality_changed']
 
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
@@ -706,8 +708,27 @@ def set_personality(update, context):
     update.message.reply_text(strings['choose_personality'], reply_markup=reply_markup)
 
 
+# Function to generate a upgrade premium message
+def share(update, context):
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use first name as the default username
 
+    share_button = InlineKeyboardButton(
+        strings['share_button'], 
+        switch_inline_query=strings['share_forward']
+    )
 
+    # Crea la tastiera inline
+    keyboard = [[share_button]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Invia un messaggio con la tastiera inline
+    update.message.reply_text(strings['share'], reply_markup=reply_markup)
 
 
 
@@ -731,6 +752,7 @@ def main():
     dp.add_handler(CommandHandler('report', report))
     dp.add_handler(CommandHandler('premium', premium))
     dp.add_handler(CommandHandler('set_personality', set_personality))
+    dp.add_handler(CommandHandler('share', share))
     dp.add_handler(MessageHandler(Filters.text & Filters.entity("url"), track), group=0)
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.entity("url"), input_callback))
     dp.add_handler(CallbackQueryHandler(buttons_callback))
@@ -738,7 +760,7 @@ def main():
     dp.add_handler(CommandHandler('broadcast_channel_message', start_broadcast))
 
     # Add a job to check the price every 6 hours
-    #job_queue.run_repeating(check_price, interval=30)
+    job_queue.run_repeating(check_price, interval=30)
     
     updater.start_polling()
     updater.idle()
