@@ -161,6 +161,15 @@ def update_premium_status(user_ID, is_premium, type=None, expiry_date=None):
             print(f"Error while updating premium_status for user {user_ID}: {e}")
 
 
+def count_documents_in_collection(collection_name):
+    # Recupera la collezione
+    collection_ref = db.collection(collection_name)
+    # Recupera i documenti
+    documents = collection_ref.stream()
+    # Conta i documenti
+    doc_count = sum(1 for _ in documents)
+    return doc_count
+
 def main():
     clean_products_history()
 

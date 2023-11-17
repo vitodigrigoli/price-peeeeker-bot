@@ -31,7 +31,7 @@ from telegram.ext import CommandHandler, Updater, Filters, MessageHandler, Callb
 import time
 from translations import it_strings
 
-from db_utils import update_products
+from db_utils import update_products, count_documents_in_collection
 from amazon_utils import extract_amazon_link, get_amazon_product, generate_add_to_cart_link
 from toolbox import generate_alert_price, time_converter, create_chart, generate_price_history, disable_auto_link
 
@@ -117,6 +117,17 @@ def set_username(update, context):
     update.message.reply_text(strings['choose_username'])
 
     context.user_data['set_username'] = True
+    context.user_data['set_alert_price'] = False
+    context.user_data['start_broadcast'] = False
+
+
+
+def start_broadcast(update, context):
+
+    update.message.reply_text("Per favore, inviami il messaggio che vuoi trasmettere.")
+
+    context.user_data['start_broadcast'] = True
+    context.user_data['set_username'] = False
     context.user_data['set_alert_price'] = False
 
 
@@ -328,6 +339,8 @@ def change_threshold(update, context, user_ID, product_ID):
 
     context.user_data['set_alert_price'] = True
     context.user_data['set_username'] = False
+    context.user_data['start_broadcast'] = False
+
     context.user_data['user_ID'] = user_ID
     context.user_data['product_ID'] = product_ID
 
@@ -371,9 +384,15 @@ def input_callback(update, context):
             print(f"Error while entering the new price target: {e}")
             update.message.reply_text(strings['threshold_not_valid'], parse_mode='HTML')
 
+    elif context.user_data.get('start_broadcast'):
+        message = update.message.text
+        context.bot.send_message(chat_id=DEV_ID, text="Messaggio ricevuto. Inviando a tutti gli utenti...")
+        # Invia il messaggio a tutti gli utenti
+        broadcast_message(update, context, message)
+        context.user_data['start_broadcast'] = False
+
     else:
         update.message.reply_text(strings['default_message'].format(custom_name=custom_name))
-
 
 
 # Function to send an Amazon affiliate link
@@ -532,10 +551,10 @@ def buttons_callback(update, context):
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
     elif action == 'personality':
+        user = User.get_user(user_ID)
         personality_mode = value
         user.update_personality_mode(personality_mode)
 
-        user = User.get_user(user_ID)
         strings = responses[user.language_preference][user.personality_mode]
 
         text = strings['personality_changed']
@@ -602,32 +621,25 @@ def send_product( context, user_ID, product: Product, product_data):
 
 def get_stat(update, context):
 
-    docs = db.collection('user_data').stream()
-    user_list = []
+    users_count = count_documents_in_collection('users')
+    products_count = count_documents_in_collection('products')
 
-    for doc in docs:
-        data = doc.to_dict()
-        user_list.append(data['user_ID'])
-
-    n_products = len(user_list)
-    n_users = len(set(user_list))
 
     # Send the information to the developer
-    dev_text = f"--------------------------------------------------------------\n<strong>BOT STATISTICS</strong> 📊 \n--------------------------------------------------------------\n\n📦 <strong>Tracked Products</strong>: {n_products}\n\n👥 <strong>Users</strong>: {n_users}"
+    dev_text = f"<strong>BOT STATISTICS</strong> 📊 \n\n📦 Products: {products_count}\n\n👥 Users: {users_count}"
     context.bot.send_message(chat_id=DEV_ID, text=dev_text, parse_mode='HTML')
 
 
-def broadcast_message(update, context):
+def broadcast_message(update, context, message):
 
     users = db.collection('users').stream()
 
     for doc in users:
 
         user = User.get_user(doc.id)
-        strings = responses[user.language_preference][user.personality_mode]
 
-        try:
-            context.bot.send_message(chat_id=user.ID, text=strings['broadcast'], parse_mode='HTML')
+        try:    
+            context.bot.send_message(chat_id=user.ID, text=message, parse_mode='MarkdownV2')
             time.sleep(DELAY)
         
         except error.Unauthorized:
@@ -635,11 +647,12 @@ def broadcast_message(update, context):
             user.delete()
 
         except error.TelegramError as e:
-            print('General error: {e}')
-    
+            print(f'General error: {e}')
+
+
     
 
-# Function to generate a welcome message at start
+# Function to generate a welcome message at start -- TO FIXEEEE
 def premium(update, context):
     user_ID = str(update.message.from_user.id)
     user = User.get_user(user_ID)
@@ -694,8 +707,6 @@ def set_personality(update, context):
 
 
 
-
-
 def main():
 
     # Initialization Bot
@@ -711,7 +722,7 @@ def main():
     dp.add_handler(CommandHandler('help', help))
     dp.add_handler(CommandHandler('set_username', set_username), group=1)
     dp.add_handler(CommandHandler('coffee', coffee))
-    dp.add_handler(CommandHandler('dev', get_stat))
+    dp.add_handler(CommandHandler('stat', get_stat))
     dp.add_handler(CommandHandler('report', report))
     dp.add_handler(CommandHandler('premium', premium))
     dp.add_handler(CommandHandler('set_personality', set_personality))
@@ -719,9 +730,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.entity("url"), input_callback))
     dp.add_handler(CallbackQueryHandler(buttons_callback))
 
-    # Configura un comando per inviare il broadcast
-    dp.add_handler(CommandHandler("broadcast", broadcast_message))
-
+    dp.add_handler(CommandHandler('broadcast_channel_message', start_broadcast))
 
     # Add a job to check the price every 6 hours
     #job_queue.run_repeating(check_price, interval=30)
