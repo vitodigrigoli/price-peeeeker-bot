@@ -97,7 +97,7 @@ class Product:
         doc = product_ref.get()
 
         if doc.exists:
-            product_ref.set({
+            product_ref.update({
                     'history': new_history
                 })
             

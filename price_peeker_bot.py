@@ -280,7 +280,8 @@ def view_tracked_products(update, context):
         for product_ID, product_data in user.tracked_products.items():
 
             product = Product.get_product(product_ID)
-            print_product(update, context, product, product_data)
+            #print_product(update, context, product, product_data)
+            send_product(context, user.ID, product, product_data)
 
             time.sleep(DELAY)
     else:
@@ -453,6 +454,7 @@ def track (update, context):
             update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
 
 
+
 def add_product(amazon_product, user: User):
 
     product_ID = amazon_product.get('ID')
@@ -483,7 +485,6 @@ def add_product(amazon_product, user: User):
     user.add_product(product_data)
 
     return product, product_data
-
 
 
 
@@ -541,7 +542,7 @@ def buttons_callback(update, context):
         product_ID = value
         context.bot.send_message(chat_id=user_ID, text=strings['retrieving'], parse_mode='HTML')
         amazon_product = get_amazon_product(product_ID, 'New')
-        if( amazon_product != None and amazon_product != 'Not Found'):
+        if(amazon_product != None and amazon_product != 'Not Found'):
             product, product_data = add_product(amazon_product, user.ID)
 
             send_product(context, user_ID, product, product_data)
@@ -551,13 +552,14 @@ def buttons_callback(update, context):
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
     elif action == 'personality':
-        user = User.get_user(user_ID)
         personality_mode = value
-        user.update_personality_mode(personality_mode)
 
-        strings = responses[user.language_preference][user.personality_mode]
+        if( (value == 'merchant_viking' or value == 'robot_devil') and user.premium_status['is_premium'] == False ):
+            text = strings['personality_not_changed']
+        else:
+            user.update_personality_mode(personality_mode)
+            text = strings['personality_changed']
 
-        text = strings['personality_changed']
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
 
@@ -594,6 +596,7 @@ def send_product( context, user_ID, product: Product, product_data):
         ]
 
         text = strings['tracked_product--available']
+        reply_markup = InlineKeyboardMarkup(keyboard)
     
     else:
 
@@ -608,14 +611,14 @@ def send_product( context, user_ID, product: Product, product_data):
         ]
 
         text = strings['tracked_product--not_available']
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
 
     try:
         context.bot.send_message(chat_id = user_ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=alert_price, last_alerted_price=last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
 
     except error.TelegramError as e:
-        print('General error: {e}')
+        print(f'General error: {e}')
 
 
 
@@ -628,6 +631,7 @@ def get_stat(update, context):
     # Send the information to the developer
     dev_text = f"<strong>BOT STATISTICS</strong> 📊 \n\n📦 Products: {products_count}\n\n👥 Users: {users_count}"
     context.bot.send_message(chat_id=DEV_ID, text=dev_text, parse_mode='HTML')
+
 
 
 def broadcast_message(update, context, message):
@@ -652,7 +656,7 @@ def broadcast_message(update, context, message):
 
     
 
-# Function to generate a welcome message at start -- TO FIXEEEE
+# Function to generate a upgrade premium message
 def premium(update, context):
     user_ID = str(update.message.from_user.id)
     user = User.get_user(user_ID)
@@ -669,7 +673,8 @@ def premium(update, context):
         ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text(strings['premium'].format(custom_name=custom_name, user_ID=user_ID, limit=MAX_TRACKED_PRODUCTS_LIMIT ), reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True)
+    update.message.reply_text(strings['premium'].format(custom_name=custom_name, user_ID=user_ID, limit=FREE_PRODUCTS_LIMIT ), reply_markup=reply_markup, parse_mode='HTML')
+
 
 
 def set_personality(update, context):
