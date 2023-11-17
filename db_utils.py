@@ -134,6 +134,14 @@ def update_products():
             product.delete()
         
 
+def clean_products_history():
+    docs = db.collection('products').stream()
+    
+    for doc in docs:
+        product = Product.get_product(doc.id)
+        product.clean_history(10)
+
+
 def update_premium_status(user_ID, is_premium, type=None, expiry_date=None):
         # Reference to the user's document
         user_ref = db.collection('users').document(user_ID)
@@ -154,7 +162,7 @@ def update_premium_status(user_ID, is_premium, type=None, expiry_date=None):
 
 
 def main():
-    users_products_migration()
+    clean_products_history()
 
 if __name__ == '__main__':
     main()

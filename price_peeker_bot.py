@@ -37,7 +37,7 @@ from toolbox import generate_alert_price, time_converter, create_chart, generate
 
 from product import Product
 from user import User
-from config import DEV_ID, BOT_TOKEN, db, MAX_TRACKED_PRODUCTS_LIMIT, DELAY
+from config import DEV_ID, BOT_TOKEN, db, FREE_PRODUCTS_LIMIT, PREMIUM_PRODUCTS_LIMIT, DELAY
 
 from bot_responses import responses
 
@@ -394,8 +394,11 @@ def track (update, context):
     message = update.message.text
     url = extract_amazon_link(message)
 
-    if user.count_tracked_products() >= MAX_TRACKED_PRODUCTS_LIMIT and user.is_premium == False:
-        update.message.reply_text(strings['track_limit'].format(custom_name=custom_name, limit=MAX_TRACKED_PRODUCTS_LIMIT))
+    if user.count_tracked_products() >= FREE_PRODUCTS_LIMIT and user.premium_status['is_premium'] == False:
+        update.message.reply_text(strings['track_limit'].format(custom_name=custom_name, limit=FREE_PRODUCTS_LIMIT))
+
+    elif user.count_tracked_products() >= PREMIUM_PRODUCTS_LIMIT and user.premium_status['is_premium'] == True:
+        update.message.reply_text(strings['track_limit'].format(custom_name=custom_name, limit=PREMIUM_PRODUCTS_LIMIT))
     
     else:
 

@@ -1,5 +1,6 @@
 from config import db
 from datetime import datetime
+from toolbox import generate_price_history
 
 
 # Definition of the Product class
@@ -89,14 +90,31 @@ class Product:
             print(f'The product {self.ID} was not found')
         
 
+    def clean_history(self, limit=90):
+        new_history = dict(sorted(self.history.items())[-limit:])
+
+        product_ref = db.collection('products').document(self.ID)
+        doc = product_ref.get()
+
+        if doc.exists:
+            product_ref.set({
+                    'history': new_history
+                })
+            
+            print(f'The history of product {self.ID} was cleaned')
+        else:
+            print(f'The product {self.ID} was not found for clean_history')
+
+
         
         
 
 def main():
 
-    product = Product.get_product('B0BZJM3742')
-    print(product)
+    product = Product('123456', 'Pippo', 'www', 45, 'Amazon', generate_price_history(45,10))
+    product.save()
 
+    product.clean_history(30)
 
 if __name__ == '__main__':
     main()

@@ -73,14 +73,14 @@ def create_chart(history, limit=90):
 
 
     # Aggiunta di titolo e etichette agli assi
-    plt.title(f'Storico Prezzi a {limit} giorni', fontsize=14)
+    plt.title(f'Storico Prezzi', fontsize=14)
     plt.xlabel('Data', fontsize=12)
     plt.ylabel('Prezzo (€)', fontsize=12)
 
     # Mostra la legenda
     plt.legend([f'Prezzo Massimo: {max_price_str}€', f'Prezzo Minimo: {min_price_str}€', f'Prezzo Medio: {avg_price_str}€'], frameon=True)
 
-    # Mostra il grafico
+    # Ottimizza lo spazio nel grafico
     plt.tight_layout()
 
     # Crea un buffer di memoria
