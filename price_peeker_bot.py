@@ -14,14 +14,14 @@ coffee - Thank the developer
 
 start - Inizia a usare il bot
 view_products - Visualizza i prodotti tracciati
-help - Come usare il bot correttamente
+help - Impara a usare il bot correttamente
 set_username - Scegli un nome personaizzato
 set_personality - Scegli la personalità del bot
+premium - Attiva le funzionalità premium del bot
 report - Segnala un bug allo sviluppatore
 coffee - Ringrazia lo sviluppatore
 share - Condividimi con i tuoi amici
 profile - Guarda il tuo profilo
-premium - Attiva le funzionalità premium del bot
 version - Visualizza le novità della nuova versione
 
 """
