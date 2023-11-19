@@ -550,7 +550,7 @@ def buttons_callback(update, context):
         context.bot.send_message(chat_id=user_ID, text=strings['retrieving'], parse_mode='HTML')
         amazon_product = get_amazon_product(product_ID, 'New')
         if(amazon_product != None and amazon_product != 'Not Found'):
-            product, product_data = add_product(amazon_product, user_ID)
+            product, product_data = add_product(amazon_product, user)
 
             send_product(context, user_ID, product, product_data)
 
