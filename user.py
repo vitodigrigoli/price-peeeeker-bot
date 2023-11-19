@@ -3,7 +3,7 @@ from config import db, firestore
 # Definition of the User class
 class User:
 
-    def __init__(self, ID, premium_status = {'is_premium': False, 'type': None, 'expiry_date': None}, language_preference='it', personality_mode='default', tracked_products={} ):
+    def __init__(self, ID, premium_status = {'is_premium': False, 'type': None, 'expiry_date': None}, language_preference='it', personality_mode='robot_friendly', tracked_products={} ):
 
         self.ID = ID
         self.premium_status = premium_status

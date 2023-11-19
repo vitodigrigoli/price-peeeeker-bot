@@ -28,7 +28,11 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, error
 from telegram.ext import CommandHandler, Updater, Filters, MessageHandler, CallbackQueryHandler
 
 
+
+from datetime import time as dt_time
 import time
+from pytz import timezone
+
 from translations import it_strings
 
 from db_utils import update_products, count_documents_in_collection
@@ -37,7 +41,7 @@ from toolbox import generate_alert_price, time_converter, create_chart, generate
 
 from product import Product
 from user import User
-from config import DEV_ID, BOT_TOKEN, db, FREE_PRODUCTS_LIMIT, PREMIUM_PRODUCTS_LIMIT, DELAY
+from config import DEV_ID, BOT_TOKEN, db, FREE_PRODUCTS_LIMIT, PREMIUM_PRODUCTS_LIMIT, DELAY, ANNUAL_PRICE, LIFETIME_PRICE
 
 from bot_responses import responses
 
@@ -59,7 +63,6 @@ def start(update, context):
     update.message.reply_text(strings['welcome'].format(custom_name=custom_name), parse_mode='HTML', disable_web_page_preview=True)
 
     
-
 
 # Function to generate a report message
 def report(update, context):
@@ -675,7 +678,7 @@ def premium(update, context):
         ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text(strings['premium'].format(custom_name=custom_name, user_ID=user_ID, limit=FREE_PRODUCTS_LIMIT ), reply_markup=reply_markup, parse_mode='HTML')
+    update.message.reply_text(strings['premium'].format(custom_name=custom_name, user_ID=user_ID, free_limit=FREE_PRODUCTS_LIMIT, premium_limit=PREMIUM_PRODUCTS_LIMIT, annual_price=ANNUAL_PRICE, lifetime_price=LIFETIME_PRICE ), reply_markup=reply_markup, parse_mode='HTML')
 
 
 
@@ -693,7 +696,7 @@ def set_personality(update, context):
 
     keyboard = [
             [
-                InlineKeyboardButton(strings['robot_friendly'], callback_data=f'personality:default'),
+                InlineKeyboardButton(strings['robot_friendly'], callback_data=f'personality:robot_friendly'),
             ],
             [
                 InlineKeyboardButton(strings['robot_devil'], callback_data=f'personality:robot_devil'),
@@ -731,6 +734,30 @@ def share(update, context):
     update.message.reply_text(strings['share'], reply_markup=reply_markup)
 
 
+# Function to generate a upgrade premium message
+def profile(update, context):
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use first name as the default username
+
+    if user.premium_status['is_premium']:
+        # Invia un messaggio con la tastiera inline
+        update.message.reply_text(strings['profile_premium'].format(custom_name=custom_name, tracked_products=user.count_tracked_products(), personality_mode=user.personality_mode, language=user.language_preference, premium_type=user.premium_status['type'], premium_expiry=user.premium_status['expiry_date'], limit=PREMIUM_PRODUCTS_LIMIT), parse_mode='HTML')
+    else:
+        # Invia un messaggio con la tastiera inline
+        keyboard = [
+            [
+                InlineKeyboardButton(strings['premium_button'], callback_data=f'premium:'),
+            ],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.message.reply_text(strings['profile'].format(custom_name=custom_name, tracked_products=user.count_tracked_products(), personality_mode=user.personality_mode, language=user.language_preference, limit=FREE_PRODUCTS_LIMIT), reply_markup=reply_markup, parse_mode='HTML')
+
+
 
 
 def main():
@@ -753,14 +780,25 @@ def main():
     dp.add_handler(CommandHandler('premium', premium))
     dp.add_handler(CommandHandler('set_personality', set_personality))
     dp.add_handler(CommandHandler('share', share))
+    dp.add_handler(CommandHandler('profile', profile))
     dp.add_handler(MessageHandler(Filters.text & Filters.entity("url"), track), group=0)
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.entity("url"), input_callback))
     dp.add_handler(CallbackQueryHandler(buttons_callback))
 
     dp.add_handler(CommandHandler('broadcast_channel_message', start_broadcast))
 
-    # Add a job to check the price every 6 hours
-    job_queue.run_repeating(check_price, interval=30)
+
+    # Imposta il fuso orario di Roma
+    roma_zone = timezone('Europe/Rome')
+
+    # Orari di esecuzione: 10:00 e 17:00 nel fuso orario di Roma
+    orari_esecuzione = [dt_time(10, 0, 0, tzinfo=roma_zone), dt_time(17, 0, 0, tzinfo=roma_zone)]
+
+    # Aggiungi i job alla job queue
+    for orario in orari_esecuzione:
+        job_queue.run_daily(check_price, orario)
+    
+
     
     updater.start_polling()
     updater.idle()
