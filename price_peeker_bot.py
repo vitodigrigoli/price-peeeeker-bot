@@ -16,8 +16,12 @@ start - Inizia a usare il bot
 view_products - Visualizza i prodotti tracciati
 help - Come usare il bot correttamente
 set_username - Scegli un nome personaizzato
+set_personality - Scegli la personalità del bot
 report - Segnala un bug allo sviluppatore
 coffee - Ringrazia lo sviluppatore
+share - Condividimi con i tuoi amici
+profile - Guarda il tuo profilo
+premium - Attiva le funzionalità premium del bot
 version - Visualizza le novità della nuova versione
 
 """
@@ -557,7 +561,7 @@ def buttons_callback(update, context):
     elif action == 'personality':
         personality_mode = value
 
-        if( (value == 'merchant_viking' or value == 'robot_devil') and user.premium_status['is_premium'] == False ):
+        if( (value == 'merchant_viking') and user.premium_status['is_premium'] == False ):
             text = strings['personality_not_changed']
         else:
             user.update_personality_mode(personality_mode)
@@ -757,6 +761,19 @@ def profile(update, context):
         reply_markup = InlineKeyboardMarkup(keyboard)
         update.message.reply_text(strings['profile'].format(custom_name=custom_name, tracked_products=user.count_tracked_products(), personality_mode=user.personality_mode, language=user.language_preference, limit=FREE_PRODUCTS_LIMIT), reply_markup=reply_markup, parse_mode='HTML')
 
+# Function to generate a upgrade premium message
+def version(update, context):
+    user_ID = str(update.message.from_user.id)
+    user = User.get_user(user_ID)
+    if user == None:
+        user = User(user_ID)
+        user.save()
+    strings = responses[user.language_preference][user.personality_mode]
+    custom_name = context.user_data.get('custom_name', update.message.from_user.first_name)  # Use first name as the default username
+
+    # Invia un messaggio con la tastiera inline
+    update.message.reply_text(strings['version'], parse_mode='HTML')
+
 
 
 
@@ -781,6 +798,7 @@ def main():
     dp.add_handler(CommandHandler('set_personality', set_personality))
     dp.add_handler(CommandHandler('share', share))
     dp.add_handler(CommandHandler('profile', profile))
+    dp.add_handler(CommandHandler('version', version))
     dp.add_handler(MessageHandler(Filters.text & Filters.entity("url"), track), group=0)
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.entity("url"), input_callback))
     dp.add_handler(CallbackQueryHandler(buttons_callback))
