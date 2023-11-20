@@ -124,17 +124,49 @@ def set_username(update, context):
     context.user_data['set_username'] = True
     context.user_data['set_alert_price'] = False
     context.user_data['start_broadcast'] = False
+    context.user_data['start_premium'] = False
 
 
 
 def start_broadcast(update, context):
 
-    update.message.reply_text("Per favore, inviami il messaggio che vuoi trasmettere.")
+    text = "Per favore, inviami il messaggio che vuoi trasmettere"
+    context.bot.send_message(chat_id=DEV_ID, text=text,)
 
     context.user_data['start_broadcast'] = True
     context.user_data['set_username'] = False
     context.user_data['set_alert_price'] = False
+    context.user_data['start_premium'] = False
 
+def start_premium(update, context):
+
+    text = "Per favore, scrivi l'ID dell'utente a cui effettuare l'upgrade"
+    context.bot.send_message(chat_id=DEV_ID, text=text,)
+
+    context.user_data['start_broadcast'] = False
+    context.user_data['set_username'] = False
+    context.user_data['set_alert_price'] = False
+    context.user_data['start_premium'] = True
+
+
+def dev_menu(update, context):
+
+    keyboard = [
+        [
+            InlineKeyboardButton("📊 Statistiche", callback_data=f'dev:stat'),
+        ],
+        [
+            InlineKeyboardButton("💎 Premium", callback_data=f'dev:premium'),
+        ],
+        [
+            InlineKeyboardButton("🗣 Broadcast", callback_data=f'dev:broadcast'),
+        ],
+    ]
+
+    
+    text = "Ciao creatore! Che cosa posso fare per te?"
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    context.bot.send_message(chat_id=DEV_ID, text=text, reply_markup=reply_markup)
 
 # Function that generates a help message
 def help(update, context):
@@ -398,6 +430,34 @@ def input_callback(update, context):
         broadcast_message(update, context, message)
         context.user_data['start_broadcast'] = False
 
+    elif context.user_data.get('start_premium'):
+        user_ID = update.message.text
+
+        user = User.get_user(user_ID)
+        if(user):
+            keyboard = [
+            [
+                InlineKeyboardButton("🆓 Trial", callback_data=f'set-premium:trial'),
+            ],
+            [
+                InlineKeyboardButton("📅 Annual", callback_data=f'set-premium:annual'),
+            ],
+            [
+                InlineKeyboardButton("🏆 Lifetime", callback_data=f'set-premium:lifetime'),
+            ],
+        ]
+
+            text = "Seleziona il tipo di pacchetto"
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            context.bot.send_message(chat_id=DEV_ID, text=text, reply_markup=reply_markup)
+            context.user_data['user_ID_premium'] = user.ID
+
+        else:
+            text = "L'utente non è stato trovato"
+            context.bot.send_message(chat_id=DEV_ID, text=text)
+        
+        context.user_data['start_premium'] = False
+
     else:
         update.message.reply_text(strings['default_message'].format(custom_name=custom_name))
 
@@ -560,7 +620,7 @@ def buttons_callback(update, context):
     elif action == 'personality':
         personality_mode = value
 
-        if( (value == 'merchant_viking') and user.premium_status['is_premium'] == False ):
+        if( (value == 'dark_wizard') and user.premium_status['is_premium'] == False ):
             text = strings['personality_not_changed']
         else:
             user.update_personality_mode(personality_mode)
@@ -569,6 +629,29 @@ def buttons_callback(update, context):
             text = strings['personality_changed']
 
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
+
+    elif action == 'dev':
+        if value == 'stat':
+            get_stat(update, context)
+        elif value == 'premium':
+            start_premium(update, context)
+        elif value == 'broadcast':
+            start_broadcast(update, context)
+
+
+    elif action == 'set-premium':
+        user_ID = context.user_data.get('user_ID_premium')
+        user = User.get_user(user_ID)
+        user.update_premium_status(value)
+        user = User.get_user(user_ID)
+        dev_text = f"Upgrade per user {user.ID} completato\n\nPremium Status:\nis_premium = {user.premium_status['is_premium']}\ntype = {user.premium_status['type']}\nexpiry_date = {user.premium_status['expiry_date']}"
+        context.bot.send_message(chat_id=DEV_ID, text=dev_text)
+
+        strings = responses[user.language_preference][user.personality_mode]
+        text = strings['premium_activated']
+        context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
+
+
 
 
     else:
@@ -702,10 +785,10 @@ def set_personality(update, context):
                 InlineKeyboardButton(strings['robot_friendly'], callback_data=f'personality:robot_friendly'),
             ],
             [
-                InlineKeyboardButton(strings['robot_devil'], callback_data=f'personality:robot_devil'),
+                InlineKeyboardButton(strings['merchant_viking'], callback_data=f'personality:merchant_viking'),
             ],
             [
-                InlineKeyboardButton(strings['merchant_viking'], callback_data=f'personality:merchant_viking'),
+                InlineKeyboardButton(strings['dark_wizard'], callback_data=f'personality:dark_wizard'),
             ],
         ]
     
@@ -760,6 +843,7 @@ def profile(update, context):
         reply_markup = InlineKeyboardMarkup(keyboard)
         update.message.reply_text(strings['profile'].format(custom_name=custom_name, tracked_products=user.count_tracked_products(), personality_mode=user.personality_mode, language=user.language_preference, limit=FREE_PRODUCTS_LIMIT), reply_markup=reply_markup, parse_mode='HTML')
 
+
 # Function to generate a upgrade premium message
 def version(update, context):
     user_ID = str(update.message.from_user.id)
@@ -772,7 +856,6 @@ def version(update, context):
 
     # Invia un messaggio con la tastiera inline
     update.message.reply_text(strings['version'], parse_mode='HTML')
-
 
 
 
@@ -803,6 +886,7 @@ def main():
     dp.add_handler(CallbackQueryHandler(buttons_callback))
 
     dp.add_handler(CommandHandler('broadcast_channel_message', start_broadcast))
+    dp.add_handler(CommandHandler('dev', dev_menu))
 
 
     # Imposta il fuso orario di Roma
@@ -816,7 +900,7 @@ def main():
         job_queue.run_daily(check_price, orario)
 
 
-    job_queue.run_repeating(check_price, interval=60)
+    #job_queue.run_repeating(check_price, interval=60)
     
 
     

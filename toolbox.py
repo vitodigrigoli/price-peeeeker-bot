@@ -2,6 +2,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import random
 import io
 
@@ -133,16 +134,33 @@ def disable_auto_link(url):
         return url.replace('.', '_')
 
 
+def generate_expiry_date(type, value):
+
+    current_date = datetime.now()
+
+    if type == 'days':   
+        expiry_date = current_date + relativedelta(days=+value)
+
+    elif type == 'months':
+        expiry_date = current_date + relativedelta(months=+value)
+
+    elif type == 'years':
+        expiry_date = current_date + relativedelta(years=+value)
+    
+    else:
+        expiry_date = None
+
+    return expiry_date.strftime("%d-%m-%Y")
 
 
 
 
 def main():
 
-    history = generate_price_history(125.55)
-    print(history)
+    expiry_date = generate_expiry_date('months', 1)
+    print(expiry_date)
 
-    create_chart(history)
+    
 
 
 

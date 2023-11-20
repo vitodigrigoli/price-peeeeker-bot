@@ -1,4 +1,5 @@
 from config import db, firestore
+from toolbox import generate_expiry_date
 
 # Definition of the User class
 class User:
@@ -178,9 +179,26 @@ class User:
         return len(self.tracked_products)
 
    
-    def update_premium_status(self, is_premium, type=None, expiry_date=None):
+    def update_premium_status(self, type=None):
         # Reference to the user's document
         user_ref = db.collection('users').document(self.ID)
+
+        if type == 'trial':
+            is_premium = True
+            expiry_date = generate_expiry_date('months', 3)
+
+        elif type == 'annual':
+            is_premium = True
+            expiry_date = generate_expiry_date('years', 1)
+
+        elif type == 'lifetime':
+            is_premium = True
+            expiry_date = None
+
+        else:
+            is_premium = False
+            expiry_date = None
+
 
         # Aggiorna i campi all'interno del dizionario 'tracked_products'
         update_data = {
@@ -218,7 +236,7 @@ def main():
 
     user = User.get_user('37104959')
 
-    user.update_premium_status(True, 'annual')
+    user.update_premium_status('lifetime')
 
 
 

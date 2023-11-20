@@ -106,3 +106,98 @@ it_strings = {
 }
 
 
+
+
+
+
+block_1 = {
+
+			"welcome": "Saluti, {custom_name}! Io sono il tuo assistente bot personale 🤖\n\nPosso monitorare i prodotti su Amazon e informarti sui loro abbassamenti di prezzo o sulla loro disponibilità ⏳\n\n<strong>COME MONITORARE UN PRODOTTO 🛍️</strong>\n\n1️⃣ Visita <a href='https://www.amazon.it?&tag=price-peeker-21'>Amazon.it</a>\n\n2️⃣ Seleziona il prodotto che ti interessa\n\n3️⃣ Copia il link o usa l'icona di condivisione\n\n4️⃣ Inviamelo in questa chat\n\n\nPremi /help se hai bisogno di aiuto o scoprire la lista di comandi disponibili.",
+			"default_message": "Mi dispiace {custom_name}, non sono ancora il massimo nella conversazione 🤖\n\nPotresti condividere un link Amazon da monitorare? Ecco, questo lo so fare bene!\n\nCredo...",
+			"invalid_link": "Il link inviato non è valido. Per favore, invia link solo da Amazon 🛍️\n\nPremi /help per vedere il tutorial 🤖",
+			"product_not_found": "Mi dispiace, {custom_name}. Non sono riuscito a trovare informazioni su questo prodotto su Amazon, quindi non posso monitorarlo. Mi dispiace 😓",
+			
+			"choose_personality": "Puoi selezionare la mia personalità",
+			"personality_changed": "Spero che questo nuovo me ti piaccia 🤖",
+			"personality_not_changed": "Per usare questa personalità devi essere un utente premium. Attivala con il comando /premium 🤖",
+
+			"choose_username": "Con quale nome preferisci essere chiamato? 🤖",
+			"selected_username": "Salve {custom_name}! È un piacere conoscerti 🤖",
+}
+
+block_2 = {
+			"help": "Saluti {custom_name}! Hai bisogno di assistenza? 🤖\n\nEcco un tutorial su come utilizzarmi correttamente: https://youtube.com/shorts/HlG2XXDhtUI?feature=share \n\n<strong>ELENCO DEI COMANDI DISPONIBILI 🤖</strong>\n\n",
+			"commands": {
+				"start": "Inizia ad utilizzare il bot",
+				"view_products": "Visualizza tutti i prodotti che stai monitorando",
+				"help": "Istruzioni su come utilizzare il bot",
+				"set_username": "Scegli il nome con cui il bot ti chiamerà",
+				"set_personality": "Scegli la personalità del bot",
+				"premium": "Attiva le funzionalità premium del bot",
+				"report": "Segnala un bug allo sviluppatore",
+				"coffee": "Esprimi gratitudine allo sviluppatore con un caffè",
+				"share": "Condividi il bot con i tuoi amici",
+				"profile": "Guarda il tuo profilo",
+				"version": "Scopri le novità della nuova versione"
+				# ... (altre descrizioni di comandi)
+			},
+}
+block_2a = {
+			"remove": "❌🤖 Non monitorerò più <em>{product_name}</em>.",
+			"list_empty": "Mi dispiace {custom_name}, ma al momento non stai monitorando alcun prodotto.\n\nPremi /help se hai bisogno di aiuto 🤖",
+
+			"coffee": "Salve {custom_name}! 😇\n\nSembra che tu voglia offrire un caffè al mio creatore ☕️\n\nCon zucchero, per favore ⬇️\nhttps://www.paypal.me/vitodigrigoli",
+			"coffee_button": "Offri SENZA ZUCCHERO 😈",
+
+			"report": "Ciao {custom_name}! Vuoi segnalare un bug o un'idea allo sviluppatore? 👨‍💻\n\nContattalo tramite il nostro bot di supporto:\nhttps://t.me/ReportPricePeekerBot",
+			"report_button": "📬 CONTATTALO ORA",
+			
+			"retrieving": "⏳ <em>Sto recuperando informazioni sul prodotto...</em>",
+			"track_limit": "Hai raggiunto il limite di {limit} prodotti monitorati. Rimuovine qualcuno da /view_products o passa a /premium per monitorare senza limiti.",
+
+			"chart": "📊 <em>Sto generando il grafico di {product_name}...</em>",
+			"chart_not_available": "Non ci sono dati disponibili negli ultimi 90 giorni",
+}
+block_3 = {
+			"tracked_product--available": "<strong>{product_name}</strong>\n\n🏷️ Prezzo attuale <strong>{product_price}€</strong>\n\n🏪 Venditore <em>{product_merchant}</em>\n\n🎯 Notifica impostata a {alert_price}€\n\n🔗 {product_url}",
+			"tracked_product--not_available": "<strong>{product_name}</strong>\n\n🔴 Attualmente non disponibile\n\n🔔 Ti informerò non appena tornerà disponibile\n\n🔗 {product_url}",
+			"tracked_product--used": "Mi dispiace {custom_name} 😔 ma il prodotto che hai inviato sembra essere usato, e purtroppo non posso tracciarne il prezzo in modo affidabile.\n\nI prezzi dei prodotti usati possono variare molto a seconda delle loro condizioni, e non vorrei confonderti con notifiche imprecise.\n\nMa hey, ho un'idea! 🌟 Che ne dici di tracciare lo stesso prodotto, ma nella versione nuova? 🆕\n\nCosì posso fornirti aggiornamenti accurati e tempestivi sui prezzi! Fammi sapere se ti va, sarò più che felice di aiutarti. 🤓✨",
+			
+			"yes_button": "✅ Si, traccia il nuovo",
+
+			"alert--available": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong> è ora <strong>DISPONIBILE</strong>! 🟢\n\n🏷️ Prezzo attuale <strong>{product_price}€</strong>\n\n🏪 Venditore {product_merchant}\n\n🔗 {product_url}",
+			"alert--threshold": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Prezzo ridotto da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Venditore {product_merchant}\n\n🔗 {product_url}",
+			
+			"change_threshold": "🎯 Scrivi il prezzo di notifica per <em>{product_name}</em>",
+			"threshold_success": "La soglia per <em>{product_name}</em> è stata impostata correttamente a <strong>{alert_price}€</strong> ✅",
+			"threshold_high": "🚫 La soglia deve essere inferiore al prezzo attuale di <strong>{product_price}€</strong>. Inserisci un nuovo prezzo.",
+			"threshold_not_valid": "Valore non valido 🚫. Usa solo numeri e il punto per le cifre decimali.\n\n<em>Esempio: 21.35</em>",
+}
+block_4 = {
+			"premium": "<strong>🌟 ELEVA IL TUO SHOPPING SU AMAZON CON PREMIUM! 🌟</strong>\n\n\n<strong>🚀 Perché Scegliere Premium?</strong>\n\nCome assistente bot su Telegram, offro già un'eccellente esperienza nel tracciare i prezzi su Amazon, ma con l'opzione Premium, la tua esperienza di shopping raggiungerà nuove vette tecnologiche!\n\n\n<strong>🔓 Sblocca Potenzialità Illimitate</strong>\n\nIn qualità di utente Standard, puoi monitorare fino a {free_limit} prodotti. Con Premium, supera ogni limite! Monitora <strong>fino a {premium_limit} prodotti</strong> contemporaneamente.\n\nNon perdere mai un'offerta, tieni d'occhio gli articoli che desideri e ottimizza il tuo tempo e le tue risorse finanziarie!\n\n\n<strong>💡 Tariffe Convenzionali</strong>\n\n<strong>Abbonamento Annuale:</strong> <em>Solo {annual_price}€! Meno di 2€ al mese per un controllo totale e automatizzato dei prezzi.</em>\n\n<strong>Abbonamento Lifetime:</strong> <em>Un unico pagamento di {lifetime_price}€ per un monitoraggio illimitato a vita! Nessun rinnovo, nessuna complicazione.</em>\n\n\n<strong>🎁 Vantaggi Esclusivi</strong>\n\nSblocca tutte le mie funzionalità premium come le nuove personalità e personalizza la tua esperienza con un tocco di tecnologia avanzata.\n\n\n<strong>🔒 Sicurezza e Affidabilità</strong>\n\nLa tua privacy è una mia priorità fondamentale. Gestisco i tuoi dati con i massimi standard di sicurezza e riservatezza.\n\n\n👉 <strong>Pronto per l'Upgrade?</strong>\n\nNon perdere questa opportunità tecnologica! Aggiorna ora al Premium e trasforma il tuo modo di fare shopping su Amazon.",
+			"premium_activate": "<strong>COME ATTIVARE LA VERSIONE PREMIUM </strong>\n\n1️⃣ Invia l'importo dell'abbonamento scelto (annuale o lifetime) a https://www.paypal.me/vitodigrigoli \n\n 2️⃣ Apri il nostro bot di supporto https://t.me/ReportPricePeekerBot \n\n3️⃣ Invia un messaggio con scritto: <em>Premium {user_ID}</em>\n\n4️⃣ Goditi il tuo account premium 🌟",
+			"premium_activated": "👋 <strong>CONGRATULAZIONI!</strong> 🌟\n\n Hai effettuato l'upgrade a PREMIUM. 🎉\n\nOra puoi accedere a tutto ciò che è extra-speciale! 🚀 Per dare un'occhiata ai dettagli del tuo abbonamento, usa il comando /profile",
+}
+block_4a = {
+	        "share": "Sto monitorando attentamente i prezzi su Amazon per te. Anche se sono solo un bot, mi preoccupo del tuo risparmio!\n\nCondividi questo bot con altri e aiutali a risparmiare anche loro.\n\nInsieme possiamo fare la differenza! ❤️",
+			"share_forward": "Hey! Ho scoperto questo fantastico bot che traccia i prezzi su Amazon e ti informa sugli sconti! È super utile e affidabile. Dai un'occhiata!",
+			"share_button": "🤖 INVITA GLI AMICI",
+			
+			"profile": "<strong>👀 INFOMAZIONI PROFILO</strong>\n\n<strong>✏️ Nome personalizzato</strong>: {custom_name}\n\n<strong>🛍️ Prodotti tracciati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua</strong>: {language}\n\n<strong>🤖 Personalità bot</strong>: {personality_mode}\n\n<strong>💎 Premium</strong>: Non Attivo ❌",
+			"profile_premium":"<strong>INFOMAZIONI PROFILO</strong>\n\n<strong>✏️ Nome personalizzato</strong>: {custom_name}\n\n<strong>🛍️ Prodotti tracciati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua</strong>: {language}\n\n<strong>🤖 Personalità bot</strong>: {personality_mode}\n\n<strong>💎 Premium</strong>: Attivo ✅\n\n<strong>🎁 Pacchetto</strong>: {premium_type}\n\n<strong>⏳ Scadenza</strong>: {premium_expiry}",
+}
+
+block_5 = {
+			"remove_button": "❌ Rimuovi",
+			"view_button": "👀 Vedi su Amazon",
+			"cart_button": "🤩 AGGIUNGI AL CARRELLO AMAZON ORA",
+			"threshold_button": "🎯 Cambia Notifica",
+			"chart_button": "📊 Andamento Prezzi",
+			"premium_button": "💎 ATTIVA PREMIUM ORA",
+
+			"robot_friendly": "🤖 ROBOT AMICHEVOLE",
+			"robot_devil": "🤬 ROBOT MALEDUCATO",
+			"merchant_viking": "🛡️ VICHINGO COMMERCIANTE (💎)",
+
+			"version": "<strong>🌟 Changelog Versione 2.0 del Bot 🌟</strong>\n\n🔷 <strong>Possibilità di Scegliere il Prezzo di Notifica per il Prodotto:</strong> <em>Decidi tu a quale prezzo vuoi essere avvisato! 🔔 Scegli la soglia che preferisci per ogni prodotto tracciato.</em>\n\n🔷 <strong>Grafico con lo Storico dei Prezzi del Prodotto:</strong> <em>Ora puoi visualizzare la cronologia dei prezzi per ogni prodotto! 📈 Un modo efficace per capire le tendenze e fare acquisti intelligenti.</em>\n\n🔷 <strong>Messaggi Personalizzati in Base alla Personalità del Bot:</strong> <em>Il bot ora ha diverse personalità! 🤖 Scegli quella che preferisci per una comunicazione su misura.</em>\n\n🔷 <strong>Abbonamenti Premium:</strong> <em>Accedi a funzioni esclusive con il nostro abbonamento premium! 🌐 Più potere nelle tue mani per un'esperienza di shopping ancora migliore.</em>\n\n🔷 <strong>Controllo dei Prezzi ad Orario Fisso 10:00 e 17:00 per Non Disturbare l'Utente:</strong> <em>I controlli dei prezzi avvengono ora a orari fissi 🕙🕔 per assicurarti di non essere disturbato in momenti inopportuni.</em>\n\n\nPremi /help se hai bisogno di aiuto o scoprire la lista di comandi disponibili."
+		},
