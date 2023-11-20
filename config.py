@@ -20,7 +20,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Create an Amazon instance
-amazon = AmazonApi(AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOC_TAG, AMAZON_COUNTRY, throttling=10)
+amazon = AmazonApi(AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOC_TAG, AMAZON_COUNTRY, throttling=2)
 
 # Constant
 FREE_PRODUCTS_LIMIT = 30

@@ -171,7 +171,7 @@ def count_documents_in_collection(collection_name):
     return doc_count
 
 def main():
-    clean_products_history()
+    users_products_migration()
 
 if __name__ == '__main__':
     main()

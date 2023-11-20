@@ -18,7 +18,7 @@ responses = {
 			"commands": {
 				"start": "Inizia ad utilizzare il bot",
 				"view_products": "Visualizza tutti i prodotti che stai monitorando",
-				"help": "Istruzioni su come utilizzare il bot",
+				"help": "Impara a utilizzare il bot",
 				"set_username": "Scegli il nome con cui il bot ti chiamerà",
 				"set_personality": "Scegli la personalità del bot",
 				"premium": "Attiva le funzionalità premium del bot",
@@ -45,14 +45,14 @@ responses = {
 			"chart": "📊 <em>Sto generando il grafico di {product_name}...</em>",
 			"chart_not_available": "Non ci sono dati disponibili negli ultimi 90 giorni",
 
-			"tracked_product--available": "<strong>{product_name}</strong>\n\n🏷️ Prezzo attuale <strong>{product_price}€</strong>\n\n🏪 Venditore <em>{product_merchant}</em>\n\n🎯 Notifica impostata a {alert_price}€\n\n🔗 {product_url}",
+			"tracked_product--available": "<strong>{product_name}</strong>\n\n🏷️ Prezzo attuale <strong>{product_price}€</strong>\n\n🏪 Venduto da <em>{product_merchant}</em>\n\n🎯 Notifica impostata a {alert_price}€\n\n🔗 {product_url}",
 			"tracked_product--not_available": "<strong>{product_name}</strong>\n\n🔴 Attualmente non disponibile\n\n🔔 Ti informerò non appena tornerà disponibile\n\n🔗 {product_url}",
 			"tracked_product--used": "Mi dispiace {custom_name} 😔 ma il prodotto che hai inviato sembra essere usato, e purtroppo non posso tracciarne il prezzo in modo affidabile.\n\nI prezzi dei prodotti usati possono variare molto a seconda delle loro condizioni, e non vorrei confonderti con notifiche imprecise.\n\nMa hey, ho un'idea! 🌟 Che ne dici di tracciare lo stesso prodotto, ma nella versione nuova? 🆕\n\nCosì posso fornirti aggiornamenti accurati e tempestivi sui prezzi! Fammi sapere se ti va, sarò più che felice di aiutarti. 🤓✨",
 			
 			"yes_button": "✅ Si, traccia il nuovo",
 
-			"alert--available": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong> è ora <strong>DISPONIBILE</strong>! 🟢\n\n🏷️ Prezzo attuale <strong>{product_price}€</strong>\n\n🏪 Venditore {product_merchant}\n\n🔗 {product_url}",
-			"alert--threshold": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Prezzo ridotto da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Venditore {product_merchant}\n\n🔗 {product_url}",
+			"alert--available": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong> è ora <strong>DISPONIBILE</strong>! 🟢\n\n🏷️ Prezzo attuale <strong>{product_price}€</strong>\n\n🏪 Venduto da {product_merchant}\n\n🔗 {product_url}",
+			"alert--threshold": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Prezzo ridotto da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Venduto da {product_merchant}\n\n🔗 {product_url}",
 			
 			"change_threshold": "🎯 Scrivi il prezzo di notifica per <em>{product_name}</em>",
 			"threshold_success": "La soglia per <em>{product_name}</em> è stata impostata correttamente a <strong>{alert_price}€</strong> ✅",
@@ -132,7 +132,7 @@ responses = {
 			"tracked_product--available": "<strong>{product_name}</strong>\n\n🏷️ Il tributo in oro è <strong>{product_price}€</strong>\n\n🏪 Procacciato da <em>{product_merchant}</em>\n\n🎯 Ho fissato il mio incantesimo di allerta a {alert_price}€\n\n🔗 {product_url}",
 			"tracked_product--not_available": "<strong>{product_name}</strong>\n\n🔴 Si cela nelle ombre, attualmente irraggiungibile\n\n🔔 Ti informerò non appena emergerà dalle tenebre\n\n🔗 {product_url}",
 			"tracked_product--used": "Ah, {custom_name} 😔 l'artefatto che hai scovato è già stato toccato da altre mani, e le sue vibrazioni sono incerte. I prezzi dei beni usati sono come fumi che cambiano forma.\n\nMa attento! 🌟 Che ne dici di inseguire lo stesso oggetto, ma nella sua forma pura e originale? 🆕\n\nCosì, potrò guidarti con precisione tra le nebbie dei prezzi! Fammi sapere se desideri questo sentiero oscuro. 🤓✨",
-			"yes_button": "✅ Sì, traccia il nuovo",
+			"yes_button": "✅ Sì, scova il nuovo",
 			
 			"alert--available": "<strong>🚨 ALLARME! 🚨</strong>\n\n<strong>{product_name}</strong> è ora <strong>DISPONIBILE</strong>! 🟢\n\n🏷️ Il tributo in oro è <strong>{product_price}€</strong>\n\n🏪 Procacciato da <em>{product_merchant}</em>\n\n🔗 {product_url}",
 			"alert--threshold": "<strong>🚨 ALLARME! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Il tributo in oro è sceso da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Procacciato da <em>{product_merchant}</em>\n\n🔗 {product_url}",
@@ -211,15 +211,15 @@ responses = {
 			"chart": "📊 <em>Sto tracciando le stelle per il grafico di {product_name}...</em>",
 			"chart_not_available": "Non ci sono segni nei cieli degli ultimi 90 giorni",
 
-			"tracked_product--available": "<strong>{product_name}</strong>\n\n🏷️ Valore bottino <strong>{product_price}€</strong>\n\n🏪 Barattato da <em>{product_merchant}</em>\n\n🎯 Prezzo di conquista impostato a {alert_price}€\n\n🔗 {product_url}",
+			"tracked_product--available": "<strong>{product_name}</strong>\n\n🏷️ Valore bottino <strong>{product_price}€</strong>\n\n🏪 Barattato da <em>{product_merchant}</em>\n\n🎯 Prezzo di saccheggio impostato a {alert_price}€\n\n🔗 {product_url}",
 			"tracked_product--not_available": "<strong>{product_name}</strong>\n\n🔴 Attualmente è come un tesoro nascosto\n\n🔔 Ti informerò non appena emergerà dalle nebbie\n\n🔗 {product_url}",
 			"tracked_product--used": "Mi dispiace {custom_name} 😔 ma il bottino che hai scovato pare essere di seconda mano, e non posso seguire il suo valore nel mare delle variazioni.\n\nI prezzi dei manufatti usati possono fluttuare come le onde, e non vorrei sbalzarti con notifiche erranti.\n\nMa hey, ho un'idea! 🌟 Che ne dici di tracciare lo stesso prodotto, ma nuovo di zecca? 🆕\n\nCosì posso fornirti aggiornamenti precisi come la rotta di un drakkar! Fammi sapere se ti va, sarò più che felice di aiutarti. 🤓✨",
-			"yes_button": "✅ Sì, traccia il nuovo",
+			"yes_button": "✅ Sì, scova il nuovo",
 			
 			"alert--available": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong> è ora come un drakkar in vista! 🟢\n\n🏷️ Valore bottino <strong>{product_price}€</strong>\n\n🏪 Barattato da {product_merchant}\n\n🔗 {product_url}",
-			"alert--threshold": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Valore bottino ridotto da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Barattato da {product_merchant}\n\n🔗 {product_url}",
+			"alert--threshold": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Bottino ridotto da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Barattato da {product_merchant}\n\n🔗 {product_url}",
 			
-			"change_threshold": "🎯 Indica il prezzo di conquista per <em>{product_name}</em>",
+			"change_threshold": "🎯 Indica il valore di saccheggio per <em>{product_name}</em>",
 			"threshold_success": "La soglia di saccheggio per <em>{product_name}</em> è stata impostata correttamente a <strong>{alert_price}€</strong> ✅",
 			"threshold_high": "🚫 La soglia di saccheggio deve essere inferiore al valore di bottino attuale di <strong>{product_price}€</strong>. Inserisci un nuovo valore di saccheggio.",
 			"threshold_not_valid": "Valore saccheggio non valido 🚫. Usa solo numeri e il punto per le cifre decimali.\n\n<em>Esempio: 21.35</em>",

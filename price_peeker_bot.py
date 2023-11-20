@@ -296,7 +296,7 @@ def check_price(context):
     [hours, minutes, seconds] = time_converter(elapsed_time)
     [avg_hours, avg_minutes, avg_seconds] = time_converter(elapsed_time/count)
 
-    dev_text = f"--------------------------------------------------------------\n<strong>CHECK PRICE JOB STATISTICS</strong> 📊 \n--------------------------------------------------------------\n\n⏱ <strong>Elapsed Time</strong>: {int(hours)} hours - {int(minutes)} minutes - {int(seconds)} seconds\n\n📦 <strong>Tracked Products</strong>: {count}\n\n🧮 <strong>Time/Products</strong>: {int(avg_hours)} hours - {int(avg_minutes)} minutes - {int(avg_seconds)} seconds"
+    dev_text = f"<strong>CHECK PRICE JOB STATISTICS</strong> 📊\n\n⏱ <strong>Elapsed Time</strong>: {int(hours)} hours - {int(minutes)} minutes - {int(seconds)} seconds\n\n📦 <strong>Tracked Products</strong>: {count}\n\n🧮 <strong>Time/Products</strong>: {int(avg_hours)} hours - {int(avg_minutes)} minutes - {int(avg_seconds)} seconds"
     #context.bot.send_message(chat_id=DEV_ID, text=dev_text, parse_mode='HTML')
 
 
@@ -745,7 +745,6 @@ def broadcast_message(update, context, message):
             print(f'General error: {e}')
 
 
-    
 
 # Function to generate a upgrade premium message
 def premium(update, context):
