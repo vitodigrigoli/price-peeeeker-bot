@@ -2,7 +2,7 @@ responses = {
 	'it': {
 		'robot_friendly':{
 
-			"welcome": "Saluti, {custom_name}! Io sono il tuo assistente bot personale 🤖\n\nPosso monitorare i prodotti su Amazon e informarti sui loro abbassamenti di prezzo o sulla loro disponibilità ⏳\n\n<strong>COME MONITORARE UN PRODOTTO 🛍️</strong>\n\n1️⃣ Visita <a href='https://www.amazon.it?&tag=price-peeker-21'>Amazon.it</a>\n\n2️⃣ Seleziona il prodotto che ti interessa\n\n3️⃣ Copia il link o usa l'icona di condivisione\n\n4️⃣ Inviamelo in questa chat\n\n\nPremi /help se hai bisogno di aiuto o per scoprire la lista di comandi disponibili.",
+			"welcome": "Saluti, {custom_name}! Io sono il tuo assistente bot personale 🤖\n\nPosso monitorare i prodotti su Amazon e informarti sui loro abbassamenti di prezzo o sulla loro disponibilità ⏳\n\n<strong>COME MONITORARE UN PRODOTTO 🛍️</strong>\n\n1️⃣ Visita <a href='https://www.amazon.it?&tag=price-peeker-21'>Amazon.it</a>\n\n2️⃣ Seleziona il prodotto che ti interessa\n\n3️⃣ Copia il link o usa l'icona di condivisione\n\n4️⃣ Inviamelo in questa chat\n\n\nPremi /help se hai bisogno di aiuto o se vuoi scoprire la lista dei comandi disponibili.",
 			"default_message": "Mi dispiace {custom_name}, non sono ancora il massimo nella conversazione 🤖\n\nPotresti condividere un link Amazon da monitorare? Ecco, questo lo so fare bene!\n\nCredo...",
 			"invalid_link": "Il link inviato non è valido. Per favore, invia link solo da Amazon 🛍️\n\nPremi /help per vedere il tutorial 🤖",
 			"product_not_found": "Mi dispiace, {custom_name}. Non sono riuscito a trovare informazioni su questo prodotto su Amazon, quindi non posso monitorarlo. Mi dispiace 😓",
@@ -71,25 +71,25 @@ responses = {
 			"profile_premium":"<strong>INFOMAZIONI PROFILO</strong>\n\n<strong>✏️ Nome personalizzato</strong>: {custom_name}\n\n<strong>🛍️ Prodotti tracciati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua</strong>: {language}\n\n<strong>🤖 Personalità bot</strong>: {personality_mode}\n\n<strong>💎 Premium</strong>: Attivo ✅\n\n<strong>🎁 Pacchetto</strong>: {premium_type}\n\n<strong>⏳ Scadenza</strong>: {premium_expiry}",
 		
 			"remove_button": "❌ Rimuovi",
-			"view_button": "👀 Vedi su Amazon",
+			"view_button": "🤩 COMPRA SU AMAZON ORA!",
 			"cart_button": "🤩 AGGIUNGI AL CARRELLO AMAZON ORA",
-			"threshold_button": "🎯 Cambia Notifica",
-			"chart_button": "📊 Andamento Prezzi",
+			"threshold_button": "🎯 Cambia Prezzo di Notifica",
+			"chart_button": "📊 Grafico Prezzi",
 			"premium_button": "💎 ATTIVA PREMIUM ORA",
 
 			"robot_friendly": "🤖 ROBOT AMICHEVOLE",
 			"dark_wizard": "🧙‍♂️ MAGO OSCURO (💎)",
 			"merchant_viking": "🛡️ VICHINGO COMMERCIANTE",
 
-			"version": "<strong>🌟 Changelog Versione 2.0 del Bot 🌟</strong>\n\n🔷 <strong>Possibilità di Scegliere il Prezzo di Notifica per il Prodotto:</strong> <em>Decidi tu a quale prezzo vuoi essere avvisato! 🔔 Scegli la soglia che preferisci per ogni prodotto tracciato.</em>\n\n🔷 <strong>Grafico con lo Storico dei Prezzi del Prodotto:</strong> <em>Ora puoi visualizzare la cronologia dei prezzi per ogni prodotto! 📈 Un modo efficace per capire le tendenze e fare acquisti intelligenti.</em>\n\n🔷 <strong>Messaggi Personalizzati in Base alla Personalità del Bot:</strong> <em>Il bot ora ha diverse personalità! 🤖 Scegli quella che preferisci per una comunicazione su misura.</em>\n\n🔷 <strong>Abbonamenti Premium:</strong> <em>Accedi a funzioni esclusive con il nostro abbonamento premium! 🌐 Più potere nelle tue mani per un'esperienza di shopping ancora migliore.</em>\n\n🔷 <strong>Controllo dei Prezzi ad Orario Fisso 10:00 e 17:00 per Non Disturbare l'Utente:</strong> <em>I controlli dei prezzi avvengono ora a orari fissi 🕙🕔 per assicurarti di non essere disturbato in momenti inopportuni.</em>\n\n\nPremi /help se hai bisogno di aiuto o scoprire la lista di comandi disponibili."
+			"version": "<strong>🌟 Changelog Versione 2.0 del Bot 🌟</strong>\n\n🔷 <strong>Possibilità di Scegliere il Prezzo di Notifica per il Prodotto:</strong> <em>Decidi tu a quale prezzo vuoi essere avvisato! 🔔 Scegli la soglia che preferisci per ogni prodotto tracciato.</em>\n\n🔷 <strong>Grafico con lo Storico dei Prezzi del Prodotto:</strong> <em>Ora puoi visualizzare la cronologia dei prezzi per ogni prodotto! 📈 Un modo efficace per capire le tendenze e fare acquisti intelligenti.</em>\n\n🔷 <strong>Messaggi Personalizzati in Base alla Personalità del Bot:</strong> <em>Il bot ora ha diverse personalità! 🤖 Scegli quella che preferisci per una comunicazione su misura.</em>\n\n🔷 <strong>Abbonamenti Premium:</strong> <em>Accedi a funzioni esclusive con il nostro abbonamento premium! 🌐 Più potere nelle tue mani per un'esperienza di shopping ancora migliore.</em>\n\n🔷 <strong>Controllo dei Prezzi ad Orario Fisso 10:00 e 17:00 per Non Disturbare l'Utente:</strong> <em>I controlli dei prezzi avvengono ora a orari fissi 🕙🕔 per assicurarti di non essere disturbato in momenti inopportuni.</em>\n\n\nPremi /help se hai bisogno di aiuto o se vuoi scoprire la lista dei comandi disponibili."
 		},
 
 		'dark_wizard': {
 
-			"welcome": "Ah, {custom_name}, benvenuto nel mio dominio oscuro. Io sono il tuo araldo delle ombre, il custode dei segreti su Amazon 🧙‍♂️. Con il mio occhio che tutto vede, monitorerò i prodotti e ti svelerò i loro mutamenti di prezzo o la loro emersione dalle tenebre ⏳.\n\n<strong>PER TRACCIARE UNA PREDA 🛍️</strong>\n\n1️⃣ Vaga per le cripte di <a href='https://www.amazon.it?&tag=price-peeker-21'>Amazon.it</a>\n\n2️⃣ Seleziona la tua ambizione nascosta\n\n3️⃣ Cattura il link come un segreto oscuro\n\n4️⃣ Inviamelo attraverso i canali oscuri di questa chat\n\n\nInvoca /help se hai bisogno di assistenza nelle arti oscure o per scoprire l'arsenale di comandi a tua disposizione.",
+			"welcome": "Ah, {custom_name}, benvenuto nel mio dominio oscuro. Io sono il tuo araldo delle ombre, il custode dei segreti su Amazon 🧙‍♂️.\n\nCon il mio occhio che tutto vede, monitorerò i prodotti e ti svelerò i loro mutamenti di prezzo o la loro emersione dalle tenebre ⏳.\n\n<strong>COME SCOVARE UN ARTEFATTO 🛍️</strong>\n\n1️⃣ Vaga per le cripte di <a href='https://www.amazon.it?&tag=price-peeker-21'>Amazon.it</a>\n\n2️⃣ Seleziona l'artefatto da procacciare\n\n3️⃣ Cattura il link come un segreto oscuro\n\n4️⃣ Inviamelo attraverso i canali oscuri di questa chat\n\n\nInvoca /help se hai bisogno di assistenza nelle arti oscure o per scoprire l'arsenale di poteri a tua disposizione.",
 			"default_message": "Ah, {custom_name}, la mia maestria nelle conversazioni è limitata come il confine tra luce e oscurità 🧙‍♂️. Potresti condividere un link di Amazon da scrutare? Questo è un potere che posseggo!\n\nForse...",
 			"invalid_link": "Il link che hai inviato è un enigma, privo di verità. Per favore, invia soltanto i segnali provenienti dal regno di Amazon 🛍️\n\nInvoca /help per un'illuminazione 🪄",
-			"product_not_found": "Ah, {custom_name}, anche con le mie arti oscure non ho scorto tracce di questo prodotto su Amazon, eludendo così il mio sguardo. Mi dispiace 😓",
+			"product_not_found": "Ah, {custom_name}, anche con le mie arti oscure non ho scorto tracce di questo artefatto su Amazon, eludendo così il mio sguardo. Mi dispiace 😓",
 			
 			"choose_personality": "Scegli l'essenza della mia ombra",
 			"personality_changed": "Che la mia nuova forma oscura ti sia di gradimento 🧙‍♂️",
@@ -101,7 +101,7 @@ responses = {
 			"help": "Ah, {custom_name}, desideri esplorare i segreti nascosti? 🧙‍♂️\n\nEcco una pergamena oscura che rivela il modo per utilizzarmi: https://youtube.com/shorts/HlG2XXDhtUI?feature=share \n\n<strong>GLIFI DEL POTERE 📜</strong>\n\n",
 			"commands": {
 				"start": "Inizia il tuo viaggio nelle ombre",
-				"view_products": "Osserva i tesori che hai catturato nel tuo incantesimo",
+				"view_products": "Evoca gli artefatti che hai catturato",
 				"help": "Scopri come manipolare il tuo servitore oscuro",
 				"set_username": "Scegli il nome con cui sarai invocato dalle tenebre",
 				"set_personality": "Scegli l'aspetto del tuo famiglio",
@@ -137,7 +137,7 @@ responses = {
 			"alert--available": "<strong>🚨 ALLARME! 🚨</strong>\n\n<strong>{product_name}</strong> è ora <strong>DISPONIBILE</strong>! 🟢\n\n🏷️ Il tributo in oro è <strong>{product_price}€</strong>\n\n🏪 Procacciato da <em>{product_merchant}</em>\n\n🔗 {product_url}",
 			"alert--threshold": "<strong>🚨 ALLARME! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Il tributo in oro è sceso da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Procacciato da <em>{product_merchant}</em>\n\n🔗 {product_url}",
 			
-			"change_threshold": "🎯 Indica la soglia di allarme incantesimo per <em>{product_name}</em>",
+			"change_threshold": "🎯 Scrivi la soglia di allarme incantesimo per <em>{product_name}</em>",
 			"threshold_success": "Ho impostato con successo la soglia per <em>{product_name}</em> a <strong>{alert_price}€</strong> ✅",
 			"threshold_high": "🚫 La soglia deve essere sotto il tributo oro di <strong>{product_price}€</strong>. Scegli una nuova soglia di allarme incantesimo.",
 			"threshold_not_valid": "Valore non valido 🚫. Usa solo numeri e il punto per le cifre decimali.\n\n<em>Esempio: 21.35</em>",
@@ -153,18 +153,18 @@ responses = {
 			"profile": "<strong>👀 VISIONI DEL PROFILO OCCULTO</strong>\n\n<strong>✏️ Nome Arcano</strong>: {custom_name}\n\n<strong>🛍️ Artefatti procacciati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua degli Antichi</strong>: {language}\n\n<strong>🤖 Essenza del Bot</strong>: {personality_mode}\n\n<strong>💎 Sigillo di Premium</strong>: Non Evocato ❌",
 			"profile_premium": "<strong>VISIONI DEL PROFILO OCCULTO</strong>\n\n<strong>✏️ Nome Arcano</strong>: {custom_name}\n\n<strong>🛍️ Artefatti procacciati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua degli Antichi</strong>: {language}\n\n<strong>🤖 Essenza del Bot</strong>: {personality_mode}\n\n<strong>💎 Sigillo di Premium</strong>: Evocato ✅\n\n<strong>🎁 Formula</strong>: {premium_type}\n\n<strong>⏳ Ciclo Eterno</strong>: {premium_expiry}",
 
-			"remove_button": "❌ Rimuovi",
-			"view_button": "👀 Vedi su Amazon",
+			"remove_button": "❌ Dissolvi",
+			"view_button": "🤩 EVOCA ARTEFATTO SU AMAZON ORA!",
 			"cart_button": "🤩 AGGIUNGI AL CARRELLO AMAZON ORA",
-			"threshold_button": "🎯 Cambia Notifica",
-			"chart_button": "📊 Andamento Prezzi",
+			"threshold_button": "🎯 Cambia Incantesimo di Allerta",
+			"chart_button": "📊 Mappa Mistica",
 			"premium_button": "💎 ATTIVA PREMIUM ORA",
 
 			"robot_friendly": "🤖 ROBOT AMICHEVOLE",
 			"dark_wizard": "🧙‍♂️ MAGO OSCURO (💎)",
 			"merchant_viking": "🛡️ VICHINGO COMMERCIANTE",
 
-			"version": "<strong>🌟 Changelog Versione 2.0 del Bot 🌟</strong>\n\n🔷 <strong>Possibilità di Scegliere il Prezzo di Notifica per il Prodotto:</strong> <em>Decidi tu a quale prezzo vuoi essere avvisato! 🔔 Scegli la soglia che preferisci per ogni prodotto tracciato.</em>\n\n🔷 <strong>Grafico con lo Storico dei Prezzi del Prodotto:</strong> <em>Ora puoi visualizzare la cronologia dei prezzi per ogni prodotto! 📈 Un modo efficace per capire le tendenze e fare acquisti intelligenti.</em>\n\n🔷 <strong>Messaggi Personalizzati in Base alla Personalità del Bot:</strong> <em>Il bot ora ha diverse personalità! 🤖 Scegli quella che preferisci per una comunicazione su misura.</em>\n\n🔷 <strong>Abbonamenti Premium:</strong> <em>Accedi a funzioni esclusive con il nostro abbonamento premium! 🌐 Più potere nelle tue mani per un'esperienza di shopping ancora migliore.</em>\n\n🔷 <strong>Controllo dei Prezzi ad Orario Fisso 10:00 e 17:00 per Non Disturbare l'Utente:</strong> <em>I controlli dei prezzi avvengono ora a orari fissi 🕙🕔 per assicurarti di non essere disturbato in momenti inopportuni.</em>\n\n\nPremi /help se hai bisogno di aiuto o scoprire la lista di comandi disponibili."
+			"version": "<strong>🌟 Changelog Versione 2.0 del Bot 🌟</strong>\n\n🔷 <strong>Possibilità di Scegliere il Prezzo di Notifica per il Prodotto:</strong> <em>Decidi tu a quale prezzo vuoi essere avvisato! 🔔 Scegli la soglia che preferisci per ogni prodotto tracciato.</em>\n\n🔷 <strong>Grafico con lo Storico dei Prezzi del Prodotto:</strong> <em>Ora puoi visualizzare la cronologia dei prezzi per ogni prodotto! 📈 Un modo efficace per capire le tendenze e fare acquisti intelligenti.</em>\n\n🔷 <strong>Messaggi Personalizzati in Base alla Personalità del Bot:</strong> <em>Il bot ora ha diverse personalità! 🤖 Scegli quella che preferisci per una comunicazione su misura.</em>\n\n🔷 <strong>Abbonamenti Premium:</strong> <em>Accedi a funzioni esclusive con il nostro abbonamento premium! 🌐 Più potere nelle tue mani per un'esperienza di shopping ancora migliore.</em>\n\n🔷 <strong>Controllo dei Prezzi ad Orario Fisso 10:00 e 17:00 per Non Disturbare l'Utente:</strong> <em>I controlli dei prezzi avvengono ora a orari fissi 🕙🕔 per assicurarti di non essere disturbato in momenti inopportuni.</em>\n\n\nPremi /help se hai bisogno di aiuto o se vuoi scoprire la lista dei comandi disponibili."
 		},
 
 		'merchant_viking':{
@@ -219,7 +219,7 @@ responses = {
 			"alert--available": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong> è ora come un drakkar in vista! 🟢\n\n🏷️ Valore bottino <strong>{product_price}€</strong>\n\n🏪 Barattato da {product_merchant}\n\n🔗 {product_url}",
 			"alert--threshold": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Bottino ridotto da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Barattato da {product_merchant}\n\n🔗 {product_url}",
 			
-			"change_threshold": "🎯 Indica il valore di saccheggio per <em>{product_name}</em>",
+			"change_threshold": "🎯 Scrivi il valore di saccheggio per <em>{product_name}</em>",
 			"threshold_success": "La soglia di saccheggio per <em>{product_name}</em> è stata impostata correttamente a <strong>{alert_price}€</strong> ✅",
 			"threshold_high": "🚫 La soglia di saccheggio deve essere inferiore al valore di bottino attuale di <strong>{product_price}€</strong>. Inserisci un nuovo valore di saccheggio.",
 			"threshold_not_valid": "Valore saccheggio non valido 🚫. Usa solo numeri e il punto per le cifre decimali.\n\n<em>Esempio: 21.35</em>",
@@ -235,18 +235,18 @@ responses = {
 			"profile": "<strong>👀 INFORMAZIONI DEL GUERRIERO</strong>\n\n<strong>✏️ Nome da battaglia</strong>: {custom_name}\n\n<strong>🛍️ Tesori scovati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua</strong>: {language}\n\n<strong>🤖 Vessillo del bot</strong>: {personality_mode}\n\n<strong>💎 Premium</strong>: Non Attivo ❌",
 			"profile_premium": "<strong>INFORMAZIONI DEL GUERRIERO</strong>\n\n<strong>✏️ Nome da battaglia</strong>: {custom_name}\n\n<strong>🛍️ Tesori scovati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua</strong>: {language}\n\n<strong>🤖 Vessillo del bot</strong>: {personality_mode}\n\n<strong>💎 Premium</strong>: Attivo ✅\n\n<strong>🎁 Pacchetto</strong>: {premium_type}\n\n<strong>⏳ Scadenza</strong>: {premium_expiry}",
 		
-			"remove_button": "❌ Rimuovi",
-			"view_button": "👀 Vedi su Amazon",
+			"remove_button": "❌ Scaccia Via",
+			"view_button": "🤩 SACCHEGGIA BOTTINO SU AMAZON ORA!",
 			"cart_button": "🤩 AGGIUNGI AL CARRELLO AMAZON ORA",
-			"threshold_button": "🎯 Cambia Notifica",
-			"chart_button": "📊 Andamento Prezzi",
+			"threshold_button": "🎯 Cambia Prezzo di Saccheggio",
+			"chart_button": "📊 Mappa Bottino",
 			"premium_button": "💎 ATTIVA PREMIUM ORA",
 
 			"robot_friendly": "🤖 ROBOT AMICHEVOLE",
 			"dark_wizard": "🧙‍♂️ MAGO OSCURO (💎)",
 			"merchant_viking": "🛡️ VICHINGO COMMERCIANTE",
 
-			"version": "<strong>🌟 Changelog Versione 2.0 del Bot 🌟</strong>\n\n🔷 <strong>Possibilità di Scegliere il Prezzo di Notifica per il Prodotto:</strong> <em>Decidi tu a quale prezzo vuoi essere avvisato! 🔔 Scegli la soglia che preferisci per ogni prodotto tracciato.</em>\n\n🔷 <strong>Grafico con lo Storico dei Prezzi del Prodotto:</strong> <em>Ora puoi visualizzare la cronologia dei prezzi per ogni prodotto! 📈 Un modo efficace per capire le tendenze e fare acquisti intelligenti.</em>\n\n🔷 <strong>Messaggi Personalizzati in Base alla Personalità del Bot:</strong> <em>Il bot ora ha diverse personalità! 🤖 Scegli quella che preferisci per una comunicazione su misura.</em>\n\n🔷 <strong>Abbonamenti Premium:</strong> <em>Accedi a funzioni esclusive con il nostro abbonamento premium! 🌐 Più potere nelle tue mani per un'esperienza di shopping ancora migliore.</em>\n\n🔷 <strong>Controllo dei Prezzi ad Orario Fisso 10:00 e 17:00 per Non Disturbare l'Utente:</strong> <em>I controlli dei prezzi avvengono ora a orari fissi 🕙🕔 per assicurarti di non essere disturbato in momenti inopportuni.</em>\n\n\nPremi /help se hai bisogno di aiuto o scoprire la lista di comandi disponibili."
+			"version": "<strong>🌟 Changelog Versione 2.0 del Bot 🌟</strong>\n\n🔷 <strong>Possibilità di Scegliere il Prezzo di Notifica per il Prodotto:</strong> <em>Decidi tu a quale prezzo vuoi essere avvisato! 🔔 Scegli la soglia che preferisci per ogni prodotto tracciato.</em>\n\n🔷 <strong>Grafico con lo Storico dei Prezzi del Prodotto:</strong> <em>Ora puoi visualizzare la cronologia dei prezzi per ogni prodotto! 📈 Un modo efficace per capire le tendenze e fare acquisti intelligenti.</em>\n\n🔷 <strong>Messaggi Personalizzati in Base alla Personalità del Bot:</strong> <em>Il bot ora ha diverse personalità! 🤖 Scegli quella che preferisci per una comunicazione su misura.</em>\n\n🔷 <strong>Abbonamenti Premium:</strong> <em>Accedi a funzioni esclusive con il nostro abbonamento premium! 🌐 Più potere nelle tue mani per un'esperienza di shopping ancora migliore.</em>\n\n🔷 <strong>Controllo dei Prezzi ad Orario Fisso 10:00 e 17:00 per Non Disturbare l'Utente:</strong> <em>I controlli dei prezzi avvengono ora a orari fissi 🕙🕔 per assicurarti di non essere disturbato in momenti inopportuni.</em>\n\n\nPremi /help se hai bisogno di aiuto o se vuoi scoprire la lista dei comandi disponibili."
 		}
 
 

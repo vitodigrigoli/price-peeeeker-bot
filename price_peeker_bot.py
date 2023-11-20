@@ -15,12 +15,12 @@ coffee - Thank the developer
 start - Inizia a usare il bot
 view_products - Visualizza i prodotti tracciati
 help - Impara a usare il bot correttamente
-set_username - Scegli un nome personaizzato
+set_username - Scegli un nome personalizzato
 set_personality - Scegli la personalità del bot
 premium - Attiva le funzionalità premium del bot
 report - Segnala un bug allo sviluppatore
 coffee - Ringrazia lo sviluppatore
-share - Condividimi con i tuoi amici
+share - Invita i tuoi amici
 profile - Guarda il tuo profilo
 version - Visualizza le novità della nuova versione
 
@@ -138,6 +138,7 @@ def start_broadcast(update, context):
     context.user_data['set_alert_price'] = False
     context.user_data['start_premium'] = False
 
+
 def start_premium(update, context):
 
     text = "Per favore, scrivi l'ID dell'utente a cui effettuare l'upgrade"
@@ -167,6 +168,7 @@ def dev_menu(update, context):
     text = "Ciao creatore! Che cosa posso fare per te?"
     reply_markup = InlineKeyboardMarkup(keyboard)
     context.bot.send_message(chat_id=DEV_ID, text=text, reply_markup=reply_markup)
+
 
 # Function that generates a help message
 def help(update, context):
@@ -319,7 +321,7 @@ def view_tracked_products(update, context):
 
             product = Product.get_product(product_ID)
             #print_product(update, context, product, product_data)
-            send_product(context, user.ID, product, product_data)
+            send_product(context, user, product)
 
             time.sleep(DELAY)
     else:
@@ -425,7 +427,7 @@ def input_callback(update, context):
 
     elif context.user_data.get('start_broadcast'):
         message = update.message.text
-        context.bot.send_message(chat_id=DEV_ID, text="Messaggio ricevuto. Inviando a tutti gli utenti...")
+        context.bot.send_message(chat_id=DEV_ID, text="Messaggio ricevuto. Lo sto inviando a tutti gli utenti...")
         # Invia il messaggio a tutti gli utenti
         broadcast_message(update, context, message)
         context.user_data['start_broadcast'] = False
@@ -512,9 +514,8 @@ def track (update, context):
 
                 product_ID = amazon_product.get('ID')
                 product = Product.get_product(product_ID)
-                product_data = User.get_user(user_ID).get_product(product_ID)
 
-                print_product(update, context, product, product_data)      
+                send_product(context, user, product)      
         
         else:
             update.message.reply_text(strings['invalid_link'].format(custom_name=custom_name))
@@ -659,14 +660,11 @@ def buttons_callback(update, context):
 
 
 
-def send_product( context, user_ID, product: Product, product_data):
+def send_product( context, user: User, product: Product):
 
-    user = User.get_user(user_ID)
-    if user == None:
-        user = User(user_ID)
-        user.save()
     strings = responses[user.language_preference][user.personality_mode]
 
+    product_data = user.get_product(product.ID)
     alert_price = product_data.get('alert_price')
     last_alerted_price = product_data.get('last_alerted_price')
 
@@ -675,14 +673,14 @@ def send_product( context, user_ID, product: Product, product_data):
         keyboard = [
             [
                 InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
+                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+            ],
+            [
                 InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
             ],
             [
                 InlineKeyboardButton(strings['view_button'], url=product.url),
-                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
-            ],
-            [
-                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
+                #InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
             ],
         ]
 
@@ -706,7 +704,7 @@ def send_product( context, user_ID, product: Product, product_data):
 
 
     try:
-        context.bot.send_message(chat_id = user_ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=alert_price, last_alerted_price=last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
+        context.bot.send_message(chat_id = user.ID, text=text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=alert_price, last_alerted_price=last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
 
     except error.TelegramError as e:
         print(f'General error: {e}')
