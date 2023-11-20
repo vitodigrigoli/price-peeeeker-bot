@@ -37,8 +37,6 @@ from datetime import time as dt_time
 import time
 from pytz import timezone
 
-from translations import it_strings
-
 from db_utils import update_products, count_documents_in_collection
 from amazon_utils import extract_amazon_link, get_amazon_product, generate_add_to_cart_link
 from toolbox import generate_alert_price, time_converter, create_chart, generate_price_history, disable_auto_link
@@ -157,8 +155,6 @@ def help(update, context):
 
 # Function that checks whether the price has dropped
 def check_price(context):
-
-    strings = it_strings
     
     print("Start Check Price")
     start_time = time.time()
@@ -172,7 +168,9 @@ def check_price(context):
         count += 1
         user_data = doc.to_dict()
         user = User(doc.id, user_data['premium_status'], user_data['language_preference'], user_data['personality_mode'], user_data['tracked_products'])
-        
+
+        strings = responses[user.language_preference][user.personality_mode]
+
         for product_ID, product_data in user.tracked_products.items():
 
             product = Product.get_product(product_ID)
@@ -203,6 +201,7 @@ def check_price(context):
                             ],
                         ]
 
+                        
                         text = strings['alert--available']
                         reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -815,6 +814,9 @@ def main():
     # Aggiungi i job alla job queue
     for orario in orari_esecuzione:
         job_queue.run_daily(check_price, orario)
+
+
+    job_queue.run_repeating(check_price, interval=60)
     
 
     
