@@ -850,7 +850,7 @@ def main():
         job_queue.run_daily(check_price, orario)
 
 
-    job_queue.run_repeating(check_price, interval=60)
+    #job_queue.run_repeating(check_price, interval=60)
     
 
     
