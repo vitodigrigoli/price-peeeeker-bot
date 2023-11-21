@@ -224,14 +224,14 @@ def check_price(context):
                         keyboard = [
                             [
                                 InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
+                                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+                            ],
+                            [
                                 InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
                             ],
                             [
                                 InlineKeyboardButton(strings['view_button'], url=product.url),
-                                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
-                            ],
-                            [
-                                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
+                                #InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
                             ],
                         ]
 
@@ -247,7 +247,7 @@ def check_price(context):
                             user.delete()
 
                         except error.TelegramError as e:
-                            print('General error: {e}')
+                            print(f'General error: {e}')
 
                     elif(product.price <= product_data['alert_price']):
 
@@ -260,14 +260,14 @@ def check_price(context):
                         keyboard = [
                             [
                                 InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
+                                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+                            ],
+                            [
                                 InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
                             ],
                             [
                                 InlineKeyboardButton(strings['view_button'], url=product.url),
-                                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
-                            ],
-                            [
-                                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
+                                #InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
                             ],
                         ]
 
@@ -282,7 +282,7 @@ def check_price(context):
                             user.delete()
 
                         except error.TelegramError as e:
-                            print('General error: {e}')
+                            print(f'General error: {e}')
 
             else:
                 print('The product is no longer in the products collection')
@@ -327,53 +327,6 @@ def view_tracked_products(update, context):
     else:
         update.message.reply_text(strings['list_empty'].format(custom_name=custom_name))
     
-
-def print_product(update, context, product: Product, product_data):
-
-    user_ID = str(update.message.from_user.id)
-    user = User.get_user(user_ID)
-    if user == None:
-        user = User(user_ID)
-        user.save()
-    strings = responses[user.language_preference][user.personality_mode]
-
-    alert_price = product_data.get('alert_price')
-    last_alerted_price = product_data.get('last_alerted_price')
-
-    if product.price != None:
-
-        keyboard = [
-            [
-                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
-                InlineKeyboardButton(strings['threshold_button'], callback_data=f'threshold:{product.ID}'),
-            ],
-            [
-                InlineKeyboardButton(strings['view_button'], url=product.url),
-                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
-            ],
-            [
-                InlineKeyboardButton(strings['cart_button'], url=generate_add_to_cart_link(product.ID)),
-            ],
-        ]
-
-        text = strings['tracked_product--available']
-    
-    else:
-
-        keyboard = [
-            [
-                InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
-                InlineKeyboardButton(strings['view_button'], url=product.url),
-            ],
-            [
-                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
-            ],
-        ]
-
-        text = strings['tracked_product--not_available']
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text(text.format(product_name=product.name, product_price=product.price, product_url=product.url, product_merchant=disable_auto_link(product.merchant), alert_price=alert_price, last_alerted_price=last_alerted_price), reply_markup=reply_markup, parse_mode='HTML')
 
 
 def change_threshold(update, context, user_ID, product_ID):
@@ -495,7 +448,7 @@ def track (update, context):
 
             amazon_product = get_amazon_product(url)
 
-            if(amazon_product == None or amazon_product == 'Not Found'):
+            if(amazon_product['condition'] == None or amazon_product['condition'] == 'Not Found'):
                 update.message.reply_text(strings['product_not_found'].format(custom_name=custom_name))
 
             elif(amazon_product['condition'] == 'Used'):
@@ -609,13 +562,13 @@ def buttons_callback(update, context):
         product_ID = value
         context.bot.send_message(chat_id=user_ID, text=strings['retrieving'], parse_mode='HTML')
         amazon_product = get_amazon_product(product_ID, 'New')
-        if(amazon_product != None and amazon_product != 'Not Found'):
+        if(amazon_product['condition'] != None and amazon_product['condition'] != 'Not Found'):
             product, product_data = add_product(amazon_product, user)
 
-            send_product(context, user_ID, product, product_data)
+            send_product(context, user, product)
 
     elif action == 'premium':
-        text = strings['premium_activate'].format(user_ID=user_ID)
+        text = strings['premium_activate'].format(user_ID=user_ID, annual_price=ANNUAL_PRICE, lifetime_price=LIFETIME_PRICE)
         context.bot.send_message(chat_id=user_ID, text=text, parse_mode='HTML')
 
     elif action == 'personality':
@@ -692,10 +645,10 @@ def send_product( context, user: User, product: Product):
         keyboard = [
             [
                 InlineKeyboardButton(strings['remove_button'], callback_data=f'remove:{product.ID}'),
-                InlineKeyboardButton(strings['view_button'], url=product.url),
+                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
             ],
             [
-                InlineKeyboardButton(strings['chart_button'], callback_data=f'chart:{product.ID}'),
+                InlineKeyboardButton(strings['view_button'], url=product.url),
             ],
         ]
 
@@ -897,7 +850,7 @@ def main():
         job_queue.run_daily(check_price, orario)
 
 
-    #job_queue.run_repeating(check_price, interval=60)
+    job_queue.run_repeating(check_price, interval=60)
     
 
     

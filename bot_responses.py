@@ -129,13 +129,13 @@ responses = {
 			"chart": "📊 <em>Sto disegnando con la magia oscura il grafico di {product_name}...</em>",
 			"chart_not_available": "Nelle oscure nebbie degli ultimi 90 giorni, non si celano dati da rivelare",
 
-			"tracked_product--available": "<strong>{product_name}</strong>\n\n🏷️ Il tributo in oro è <strong>{product_price}€</strong>\n\n🏪 Procacciato da <em>{product_merchant}</em>\n\n🎯 Ho fissato il mio incantesimo di allerta a {alert_price}€\n\n🔗 {product_url}",
+			"tracked_product--available": "<strong>{product_name}</strong>\n\n🏷️ Il tributo in oro è <strong>{product_price}€</strong>\n\n🏪 Forgiato da <em>{product_merchant}</em>\n\n🎯 Ho fissato il mio incantesimo di allerta a {alert_price}€\n\n🔗 {product_url}",
 			"tracked_product--not_available": "<strong>{product_name}</strong>\n\n🔴 Si cela nelle ombre, attualmente irraggiungibile\n\n🔔 Ti informerò non appena emergerà dalle tenebre\n\n🔗 {product_url}",
 			"tracked_product--used": "Ah, {custom_name} 😔 l'artefatto che hai scovato è già stato toccato da altre mani, e le sue vibrazioni sono incerte. I prezzi dei beni usati sono come fumi che cambiano forma.\n\nMa attento! 🌟 Che ne dici di inseguire lo stesso oggetto, ma nella sua forma pura e originale? 🆕\n\nCosì, potrò guidarti con precisione tra le nebbie dei prezzi! Fammi sapere se desideri questo sentiero oscuro. 🤓✨",
 			"yes_button": "✅ Sì, scova il nuovo",
 			
-			"alert--available": "<strong>🚨 ALLARME! 🚨</strong>\n\n<strong>{product_name}</strong> è ora <strong>DISPONIBILE</strong>! 🟢\n\n🏷️ Il tributo in oro è <strong>{product_price}€</strong>\n\n🏪 Procacciato da <em>{product_merchant}</em>\n\n🔗 {product_url}",
-			"alert--threshold": "<strong>🚨 ALLARME! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Il tributo in oro è sceso da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Procacciato da <em>{product_merchant}</em>\n\n🔗 {product_url}",
+			"alert--available": "<strong>🚨 GUFO DA AZKABAN! 🚨</strong>\n\n<strong>{product_name}</strong> è ora <strong>DISPONIBILE</strong>! 🟢\n\n🏷️ Il tributo in oro è <strong>{product_price}€</strong>\n\n🏪 Forgiato da <em>{product_merchant}</em>\n\n🔗 {product_url}",
+			"alert--threshold": "<strong>🚨 GUFO DA AZKABAN! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Il tributo in oro è sceso da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Forgiato da <em>{product_merchant}</em>\n\n🔗 {product_url}",
 			
 			"change_threshold": "🎯 Scrivi la soglia di allarme incantesimo per <em>{product_name}</em>",
 			"threshold_success": "Ho impostato con successo la soglia per <em>{product_name}</em> a <strong>{alert_price}€</strong> ✅",
@@ -153,11 +153,11 @@ responses = {
 			"profile": "<strong>👀 VISIONI DEL PROFILO OCCULTO</strong>\n\n<strong>✏️ Nome Arcano</strong>: {custom_name}\n\n<strong>🛍️ Artefatti procacciati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua degli Antichi</strong>: {language}\n\n<strong>🤖 Essenza del Bot</strong>: {personality_mode}\n\n<strong>💎 Sigillo di Premium</strong>: Non Evocato ❌",
 			"profile_premium": "<strong>VISIONI DEL PROFILO OCCULTO</strong>\n\n<strong>✏️ Nome Arcano</strong>: {custom_name}\n\n<strong>🛍️ Artefatti procacciati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua degli Antichi</strong>: {language}\n\n<strong>🤖 Essenza del Bot</strong>: {personality_mode}\n\n<strong>💎 Sigillo di Premium</strong>: Evocato ✅\n\n<strong>🎁 Formula</strong>: {premium_type}\n\n<strong>⏳ Ciclo Eterno</strong>: {premium_expiry}",
 
-			"remove_button": "❌ Dissolvi",
-			"view_button": "🤩 EVOCA ARTEFATTO SU AMAZON ORA!",
+			"remove_button": "❌ Avada Kedavra",
+			"view_button": "🤩 ACCIO ARTEFATTO SU AMAZON ORA!",
 			"cart_button": "🤩 AGGIUNGI AL CARRELLO AMAZON ORA",
 			"threshold_button": "🎯 Cambia Incantesimo di Allerta",
-			"chart_button": "📊 Mappa Mistica",
+			"chart_button": "📊 Mappa Malandrino",
 			"premium_button": "💎 ATTIVA PREMIUM ORA",
 
 			"robot_friendly": "🤖 ROBOT AMICHEVOLE",
@@ -196,7 +196,7 @@ responses = {
 				# ... (altre descrizioni di comandi)
 			},
 
-			"remove": "❌🛡️ Non caccierò più <em>{product_name}</em> dai mari.",
+			"remove": "❌🛡️ Ho gettato <em>{product_name}</em> fuori dal drakkar. Che Njörðr sia con lui...",
 			"list_empty": "Ah, {custom_name}, le tue reti sono vuote. Nessun tesoro da tracciare.\n\nBatti /help sullo scudo per chiedere consiglio 🛡️",
 			
 			"coffee": "Salve, {custom_name}! 😇\n\nVuoi brindare al mio creatore con un boccale di idromele? ☕️\n\nCon miele, per favore ⬇️\nhttps://www.paypal.me/vitodigrigoli",
@@ -216,8 +216,8 @@ responses = {
 			"tracked_product--used": "Mi dispiace {custom_name} 😔 ma il bottino che hai scovato pare essere di seconda mano, e non posso seguire il suo valore nel mare delle variazioni.\n\nI prezzi dei manufatti usati possono fluttuare come le onde, e non vorrei sbalzarti con notifiche erranti.\n\nMa hey, ho un'idea! 🌟 Che ne dici di tracciare lo stesso prodotto, ma nuovo di zecca? 🆕\n\nCosì posso fornirti aggiornamenti precisi come la rotta di un drakkar! Fammi sapere se ti va, sarò più che felice di aiutarti. 🤓✨",
 			"yes_button": "✅ Sì, scova il nuovo",
 			
-			"alert--available": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong> è ora come un drakkar in vista! 🟢\n\n🏷️ Valore bottino <strong>{product_price}€</strong>\n\n🏪 Barattato da {product_merchant}\n\n🔗 {product_url}",
-			"alert--threshold": "<strong>🚨 ATTENZIONE! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Bottino ridotto da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Barattato da {product_merchant}\n\n🔗 {product_url}",
+			"alert--available": "<strong>🚨 URLO DI RAGNAR! 🚨</strong>\n\n<strong>{product_name}</strong> è ora come un drakkar in vista! 🟢\n\n🏷️ Valore bottino <strong>{product_price}€</strong>\n\n🏪 Barattato da {product_merchant}\n\n🔗 {product_url}",
+			"alert--threshold": "<strong>🚨 URLO DI RAGNAR! 🚨</strong>\n\n<strong>{product_name}</strong>\n\n🏷️ Bottino ridotto da <del>{last_alerted_price}€</del> a <strong>{product_price}€</strong>\n\n🏪 Barattato da {product_merchant}\n\n🔗 {product_url}",
 			
 			"change_threshold": "🎯 Scrivi il valore di saccheggio per <em>{product_name}</em>",
 			"threshold_success": "La soglia di saccheggio per <em>{product_name}</em> è stata impostata correttamente a <strong>{alert_price}€</strong> ✅",
@@ -225,7 +225,7 @@ responses = {
 			"threshold_not_valid": "Valore saccheggio non valido 🚫. Usa solo numeri e il punto per le cifre decimali.\n\n<em>Esempio: 21.35</em>",
 
 			"premium": "<strong>🌟 ELEVA IL TUO SACCHEGGIO SU AMAZON CON PREMIUM! 🌟</strong>\n\n\n<strong>🚀 Perché Scegliere Premium?</strong>\n\nCome guardiano bot dei mari di Telegram, già ti guido tra le onde dei prezzi su Amazon, ma con l'opzione Premium, la tua esperienza diventerà leggendaria!\n\n\n<strong>🔓 Sblocca Potenzialità Illimitate</strong>\n\nCome guerriero Standard, puoi monitorare fino a {free_limit} tesori. Con Premium, non ci sono limiti! Monitora <strong>fino a {premium_limit} tesori</strong> contemporaneamente.\n\nNon lasciarti sfuggire nessun bottino, sorveglia gli articoli che desideri e ottimizza il tuo tempo e le tue risorse!\n\n\n<strong>💡 Tariffe degne di un Jarl</strong>\n\n<strong>Abbonamento Annuale:</strong> <em>Solo {annual_price}€! Meno di una manciata di monete al mese per un controllo totale e automatizzato dei prezzi.</em>\n\n<strong>Abbonamento a Vita:</strong> <em>Un unico pagamento di {lifetime_price}€ per un monitoraggio senza fine! Nessun rinnovo, nessuna complicazione.</em>\n\n\n<strong>🎁 Vantaggi Esclusivi</strong>\n\nSblocca tutte le mie abilità premium come le nuove personalità e personalizza la tua esperienza con la magia della tecnologia avanzata.\n\n\n<strong>🔒 Sicurezza e Affidabilità</strong>\n\nLa tua privacy è sacra come il codice d'onore dei Vichinghi. Gestisco i tuoi dati con i massimi standard di sicurezza e riservatezza.\n\n\n👉 <strong>Pronto per l'Upgrade?</strong>\n\nNon perdere questa opportunità leggendaria! Aggiorna ora al Premium e trasforma il tuo modo di saccheggiare su Amazon.",
-			"premium_activate": "<strong>COME ATTIVARE LA VERSIONE PREMIUM </strong>\n\n1️⃣ Invia l'oro per l'abbonamento scelto (annuale o a vita) a https://www.paypal.me/vitodigrigoli \n\n 2️⃣ Apri il nostro corvo messaggero https://t.me/ReportPricePeekerBot \n\n3️⃣ Invia un messaggio con scritto: <em>Premium {user_ID}</em>\n\n4️⃣ Goditi il tuo status di Jarl 🌟",
+			"premium_activate": "<strong>COME ATTIVARE LA VERSIONE PREMIUM </strong>\n\n1️⃣ Invia l'oro per l'abbonamento scelto a https://www.paypal.me/vitodigrigoli \n\n<em>Abbonamento Annuale: {annual_price}€\nAbbonamento a Vita: {lifetime_price}€</em>\n\n 2️⃣ Usa come messaggio il testo\n\n<pre>Premium {user_ID}</pre>\n\n3️⃣ Apri il nostro corvo messaggero https://t.me/ReportPricePeekerBot se hai bisogno di aiuto",
 			"premium_activated": "👋 <strong>CONGRATULAZIONI!</strong> 🌟\n\n Sei salito a bordo del PREMIUM. 🎉\n\nOra puoi accedere a tutti i tesori nascosti! 🚀 Per visionare il tuo bottino, usa il comando /profile",
 			
 			"share": "Come un vigile guardiano dei mari del Nord, tengo sotto stretta sorveglianza i mari di Amazon per scovare per te le offerte più ricche. Ricorda, anche se sono solo un bot, la caccia al risparmio è la mia epica battaglia! 🛡️\n\nDiffondi la voce di questo fedele bot tra i tuoi compagni di clan e aiutali a unirsi alla nostra gloriosa spedizione per conquistare le onde dei prezzi.\n\nInsieme, issiamo le vele verso il trionfo nel vasto oceano del risparmio! ❤️",
@@ -235,7 +235,7 @@ responses = {
 			"profile": "<strong>👀 INFORMAZIONI DEL GUERRIERO</strong>\n\n<strong>✏️ Nome da battaglia</strong>: {custom_name}\n\n<strong>🛍️ Tesori scovati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua</strong>: {language}\n\n<strong>🤖 Vessillo del bot</strong>: {personality_mode}\n\n<strong>💎 Premium</strong>: Non Attivo ❌",
 			"profile_premium": "<strong>INFORMAZIONI DEL GUERRIERO</strong>\n\n<strong>✏️ Nome da battaglia</strong>: {custom_name}\n\n<strong>🛍️ Tesori scovati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua</strong>: {language}\n\n<strong>🤖 Vessillo del bot</strong>: {personality_mode}\n\n<strong>💎 Premium</strong>: Attivo ✅\n\n<strong>🎁 Pacchetto</strong>: {premium_type}\n\n<strong>⏳ Scadenza</strong>: {premium_expiry}",
 		
-			"remove_button": "❌ Scaccia Via",
+			"remove_button": "❌ Getta Oltre Bordo",
 			"view_button": "🤩 SACCHEGGIA BOTTINO SU AMAZON ORA!",
 			"cart_button": "🤩 AGGIUNGI AL CARRELLO AMAZON ORA",
 			"threshold_button": "🎯 Cambia Prezzo di Saccheggio",

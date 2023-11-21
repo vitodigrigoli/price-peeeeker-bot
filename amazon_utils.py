@@ -2,11 +2,7 @@ import requests
 import re
 from config import amazon, AMAZON_ASSOC_TAG
 import amazon_paapi 
-#from product import Product
 
-
-# Constant
-NOT_AVAILABLE = 99999
 
 
 # Function that generates a link to add a product directly to the cart
@@ -51,11 +47,17 @@ def get_amazon_product(url, condition='Any'):
 
     except amazon_paapi.errors.exceptions.ItemsNotFound as e:
         print("ItemsNotFound:", e)
-        return 'Not Found'
+        product_condition = 'Not Found'
+        return {
+            'condition': product_condition
+        }
 
     except Exception as e:
         print(f"Error while fetching Amazon product: {e}")
-        return None
+        product_condition = None
+        return {
+            'condition': product_condition
+        }
     
     product_ID = product.asin
     product_name = product.item_info.title.display_value
@@ -69,13 +71,15 @@ def get_amazon_product(url, condition='Any'):
 
         product_price = None
         product_merchant = None
+        product_condition = 'Not Available'
 
         return {
             'ID': product_ID,
             'name': product_name,
             'url': product_url,
             'price': product_price,
-            'merchant': product_merchant
+            'merchant': product_merchant,
+            'condition': product_condition
         }
     
 
