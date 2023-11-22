@@ -124,7 +124,7 @@ responses = {
 			"report_button": "📬 INVIA IL TUO MESSAGGIO ORA",
 
 			"retrieving": "⏳ <em>Sto evocando dal nulla le informazioni sull'artefatto...</em>",
-			"track_limit": "Hai raggiunto il limite di {limit} artefatti procacciati. Elimina qualcuno dai tuoi incantesimi con /view_products o attraversa il portale oscuro di /premium per osservare senza confini.",
+			"track_limit": "Hai raggiunto il limite di {limit} artefatti forgiati. Elimina qualcuno dai tuoi incantesimi con /view_products o attraversa il portale oscuro di /premium per osservare senza confini.",
 
 			"chart": "📊 <em>Sto disegnando con la magia oscura il grafico di {product_name}...</em>",
 			"chart_not_available": "Nelle oscure nebbie degli ultimi 90 giorni, non si celano dati da rivelare",
@@ -150,8 +150,8 @@ responses = {
 			"share_forward": "Ehi! Ho incrociato il cammino di questo magnifico bot che traccia i prezzi su Amazon e ti svela gli sconti! È un alleato utile e fedele nel regno del commercio. Esploralo!",
 			"share_button": "🧙‍♂️ INVITA I TUOI ALLEATI",
 			
-			"profile": "<strong>👀 VISIONI DEL PROFILO OCCULTO</strong>\n\n<strong>✏️ Nome Arcano</strong>: {custom_name}\n\n<strong>🛍️ Artefatti procacciati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua degli Antichi</strong>: {language}\n\n<strong>🤖 Essenza del Bot</strong>: {personality_mode}\n\n<strong>💎 Sigillo di Premium</strong>: Non Evocato ❌",
-			"profile_premium": "<strong>VISIONI DEL PROFILO OCCULTO</strong>\n\n<strong>✏️ Nome Arcano</strong>: {custom_name}\n\n<strong>🛍️ Artefatti procacciati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua degli Antichi</strong>: {language}\n\n<strong>🤖 Essenza del Bot</strong>: {personality_mode}\n\n<strong>💎 Sigillo di Premium</strong>: Evocato ✅\n\n<strong>🎁 Formula</strong>: {premium_type}\n\n<strong>⏳ Ciclo Eterno</strong>: {premium_expiry}",
+			"profile": "<strong>👀 VISIONI DEL PROFILO OCCULTO</strong>\n\n<strong>✏️ Nome Arcano</strong>: {custom_name}\n\n<strong>🛍️ Artefatti Forgiati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua degli Antichi</strong>: {language}\n\n<strong>🤖 Essenza del Bot</strong>: {personality_mode}\n\n<strong>💎 Sigillo di Premium</strong>: Non Evocato ❌",
+			"profile_premium": "<strong>VISIONI DEL PROFILO OCCULTO</strong>\n\n<strong>✏️ Nome Arcano</strong>: {custom_name}\n\n<strong>🛍️ Artefatti Forgiati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua degli Antichi</strong>: {language}\n\n<strong>🤖 Essenza del Bot</strong>: {personality_mode}\n\n<strong>💎 Sigillo di Premium</strong>: Evocato ✅\n\n<strong>🎁 Formula</strong>: {premium_type}\n\n<strong>⏳ Ciclo Eterno</strong>: {premium_expiry}",
 
 			"remove_button": "❌ Avada Kedavra",
 			"view_button": "🤩 ACCIO ARTEFATTO SU AMAZON ORA!",
@@ -206,7 +206,7 @@ responses = {
 			"report_button": "📬 MANDA IL CORVO ORA",
 			
 			"retrieving": "⏳ <em>Sto scandagliando il mare per informazioni sul tesoro...</em>",
-			"track_limit": "Hai riempito la tua nave con {limit} tesori tracciati. Scarica qualcosa da /view_products o issa la bandiera /premium per più spazio.",
+			"track_limit": "Hai riempito la tua nave con {limit} tesori scovati. Getta oltre bordo qualcosa da /view_products o issa la bandiera /premium per più spazio.",
 			
 			"chart": "📊 <em>Sto tracciando le stelle per il grafico di {product_name}...</em>",
 			"chart_not_available": "Non ci sono segni nei cieli degli ultimi 90 giorni",
@@ -236,7 +236,7 @@ responses = {
 			"profile_premium": "<strong>INFORMAZIONI DEL GUERRIERO</strong>\n\n<strong>✏️ Nome da battaglia</strong>: {custom_name}\n\n<strong>🛍️ Tesori scovati</strong>: {tracked_products}/{limit}\n\n<strong>🌍 Lingua</strong>: {language}\n\n<strong>🤖 Vessillo del bot</strong>: {personality_mode}\n\n<strong>💎 Premium</strong>: Attivo ✅\n\n<strong>🎁 Pacchetto</strong>: {premium_type}\n\n<strong>⏳ Scadenza</strong>: {premium_expiry}",
 		
 			"remove_button": "❌ Getta Oltre Bordo",
-			"view_button": "🤩 SACCHEGGIA BOTTINO SU AMAZON ORA!",
+			"view_button": "🤩 SACCHEGGIA SU AMAZON ORA!",
 			"cart_button": "🤩 AGGIUNGI AL CARRELLO AMAZON ORA",
 			"threshold_button": "🎯 Cambia Prezzo di Saccheggio",
 			"chart_button": "📊 Mappa Bottino",
