@@ -685,7 +685,7 @@ def broadcast_message(update, context, message):
         user = User.get_user(doc.id)
 
         try:    
-            context.bot.send_message(chat_id=user.ID, text=message, parse_mode='MarkdownV2')
+            context.bot.send_message(chat_id=user.ID, text=message, parse_mode='HTML')
             time.sleep(DELAY)
         
         except error.Unauthorized:
